@@ -35,12 +35,28 @@ const TranslatorEspLSC = () => {
                 numberOfLines={4} // Define una altura inicial (opcional)
                 textAlignVertical="top" // Alinea el texto en la parte superior
             />
-            <View style={styles.buttonsContainer}>
-                <TouchableOpacity
-                    style={styles.centerButton}
-                    onPress={() => navigation.navigate("Home")}
-                >
-                </TouchableOpacity>
+            <View style={styles.bottomButtons}>
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity
+                        style={styles.otherButton}
+                        onPress={() => navigation.navigate("Home")}
+                    >
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity
+                        style={styles.centerButton}
+                        onPress={() => navigation.navigate("Home")}
+                    >
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity
+                        style={styles.otherButton}
+                        onPress={() => navigation.navigate("Home")}
+                    >
+                    </TouchableOpacity>
+                </View>
             </View>
         </ScrollView>
         </KeyboardAvoidingView>
@@ -113,6 +129,20 @@ const styles = StyleSheet.create({
         borderRadius:35,
         borderColor: '#350066',
         backgroundColor: '#8d77ed'
+    },
+    otherButton: {
+        width: 50,
+        height: 50,
+        borderRadius: 5,
+        borderWidth: 4,
+        borderRadius:35,
+        borderColor: '#350066',
+        backgroundColor: '#8d77ed'
+    },
+    bottomButtons: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center'
     }
 })
 
