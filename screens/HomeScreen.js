@@ -42,7 +42,7 @@ const HomeScreen = () => {
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate("TranslatorEspLSC")}
+                    onPress={() => navigation.navigate("Dictionary")}
                     style={StyleSheet.compose(styles.button, {backgroundColor: '#ffdbde'})}
                 >
                     <Text style={styles.buttonText}>
