@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, Keyboard} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants"
+import { Camera, useCameraDevice, useCameraPermission } from "react-native-vision-camera";
 
 const lscVideo = require('../assets/images/imageTest.png')
 
@@ -11,9 +12,16 @@ const TranslatorLSCEsp = () => {
     const [text, setText] = useState('');
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
+    const device = useCameraDevice('back');
+    const { hasPermission, setHasPermission} = useCameraPermission(false);
+
     useEffect(() => {
         const showSubscription = Keyboard.addListener("keyboardDidShow", () => setIsKeyboardOpen(true));
         const hideSubscription = Keyboard.addListener("keyboardDidHide", () => setIsKeyboardOpen(false));
+        
+        Camera.requestCameraPermission().then((permission) => {
+            setHasPermission(permission === 'granted');
+        });
 
         return () => {
         showSubscription.remove();
@@ -25,10 +33,14 @@ const TranslatorLSCEsp = () => {
         <View style={styles.container}>
             {!isKeyboardOpen && (
                 <View style={styles.lscContainer}>
-                    <Image 
+                    {!hasPermission && <Text style={styles.subtitle}>No hay permiso de la cámara</Text>}
+                    {hasPermission && device != null && (
+                        <Camera
                         style={styles.lscVideo}
-                        source={lscVideo}
-                    />
+                        device={device}
+                        isActive={true}
+                        />
+                    )}
                     <TouchableOpacity style={styles.button}>
                     </TouchableOpacity>
                 </View>
