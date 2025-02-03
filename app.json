@@ -38,11 +38,6 @@
           "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera."
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "22aff0e0-e67e-4aab-8e93-92eb2ce1188d"
-      }
-    }
+    ]
   }
 }

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, Keyboard} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants"
-import { Camera, useCameraDevice, useCameraPermission } from "react-native-vision-camera";
+//import { Camera, useCameraDevice, useCameraPermission } from "react-native-vision-camera";
+// en dependencies en el package.json "react-native-vision-camera": "^4.6.3"
 
 const lscVideo = require('../assets/images/imageTest.png')
 
@@ -12,16 +13,16 @@ const TranslatorLSCEsp = () => {
     const [text, setText] = useState('');
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
-    const device = useCameraDevice('back');
-    const { hasPermission, setHasPermission} = useCameraPermission(false);
+    //const device = useCameraDevice('back');
+    //const { hasPermission, setHasPermission} = useCameraPermission(false);
 
     useEffect(() => {
         const showSubscription = Keyboard.addListener("keyboardDidShow", () => setIsKeyboardOpen(true));
         const hideSubscription = Keyboard.addListener("keyboardDidHide", () => setIsKeyboardOpen(false));
         
-        Camera.requestCameraPermission().then((permission) => {
-            setHasPermission(permission === 'granted');
-        });
+        //Camera.requestCameraPermission().then((permission) => {
+        //    setHasPermission(permission === 'granted');
+        //});
 
         return () => {
         showSubscription.remove();
@@ -33,6 +34,7 @@ const TranslatorLSCEsp = () => {
         <View style={styles.container}>
             {!isKeyboardOpen && (
                 <View style={styles.lscContainer}>
+                    {/*
                     {!hasPermission && <Text style={styles.subtitle}>No hay permiso de la cámara</Text>}
                     {hasPermission && device != null && (
                         <Camera
@@ -41,6 +43,7 @@ const TranslatorLSCEsp = () => {
                         isActive={true}
                         />
                     )}
+                    */}
                     <TouchableOpacity style={styles.button}>
                     </TouchableOpacity>
                 </View>
