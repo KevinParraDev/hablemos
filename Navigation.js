@@ -3,6 +3,7 @@ import HomeScreen from './screens/HomeScreen';
 import TranslatorLSCEsp from './screens/TranslatorLSCEsp';
 import { NavigationContainer } from '@react-navigation/native';
 import TranslatorEspLSC from './screens/TranslatorEspLSC';
+import Dictionary from './screens/DictionaryScreen';
 
 const StackNavigator = createNativeStackNavigator();
 
@@ -29,6 +30,13 @@ function Navigation(){
             <StackNavigator.Screen
                 name='TranslatorEspLSC'
                 component={TranslatorEspLSC}
+                options={{
+                    headerShown: false
+                }}
+            />
+            <StackNavigator.Screen
+                name='Dictionary'
+                component={Dictionary}
                 options={{
                     headerShown: false
                 }}
