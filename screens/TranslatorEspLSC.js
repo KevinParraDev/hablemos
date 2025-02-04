@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, KeyboardAvoidingView, ScrollView, Platform} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants"
+import { Icon } from '@rneui/themed';
 
 const lscVideo = require('../assets/images/imageTest.png')
 
@@ -22,19 +23,38 @@ const TranslatorEspLSC = () => {
                     source={lscVideo}
                 />
                 <TouchableOpacity style={styles.button}>
+                    <Icon
+                        style={styles.icon}
+                        name= 'controller-play'
+                        type='entypo'
+                        color= '#350066'
+                    />
                 </TouchableOpacity>
             </View>
-            <Text style={styles.subtitle}>Texto - Audio</Text>
-            <TextInput
-                style={styles.textarea}
-                value={text}
-                onChangeText={setText}
-                placeholder="Escribe aquí..."
-                placeholderTextColor="#350066"
-                multiline={true} // Permite múltiples líneas
-                numberOfLines={4} // Define una altura inicial (opcional)
-                textAlignVertical="top" // Alinea el texto en la parte superior
-            />
+            
+
+            <View style = {styles.textContainer}>
+                <Text style={styles.subtitle}>Texto - Audio</Text>
+                <TextInput
+                    style={styles.textarea}
+                    value={text}
+                    onChangeText={setText}
+                    placeholder="Escribe aquí..."
+                    placeholderTextColor="#350066"
+                    multiline={true} // Permite múltiples líneas
+                    numberOfLines={4} // Define una altura inicial (opcional)
+                    textAlignVertical="top" // Alinea el texto en la parte superior
+                />
+                <TouchableOpacity style={styles.button}>
+                    <Icon 
+                        style={styles.icon}
+                        name= 'microphone'
+                        type='foundation'
+                        color= '#350066'
+                    />
+                </TouchableOpacity>
+            </View>
+
             <View style={styles.bottomButtons}>
                 <View style={styles.buttonsContainer}>
                     <TouchableOpacity
@@ -46,14 +66,14 @@ const TranslatorEspLSC = () => {
                 <View style={styles.buttonsContainer}>
                     <TouchableOpacity
                         style={styles.centerButton}
-                        onPress={() => navigation.navigate("Home")}
+                        onPress={() => navigation.navigate("TranslatorLSCEsp")}
                     >
                     </TouchableOpacity>
                 </View>
                 <View style={styles.buttonsContainer}>
                     <TouchableOpacity
                         style={styles.otherButton}
-                        onPress={() => navigation.navigate("Home")}
+                        onPress={() => navigation.navigate("Dictionary")}
                     >
                     </TouchableOpacity>
                 </View>
@@ -66,6 +86,7 @@ const TranslatorEspLSC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingVertical: 20,
         paddingTop: Constants.statusBarHeight,
         backgroundColor: '#d7e6fa',
     },
@@ -75,22 +96,26 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     lscContainer: {
+        marginTop: 10,
         width: '100%',
+        height: 500,
         alignItems: 'center',
         position: 'relative'
     },
     lscVideo: {
         width: '100%',
-        height: 400,
+        height: 500,
         borderWidth: 4,
         borderRadius:30,
         borderColor: '#350066'
     },
     button: {
         position: 'absolute',
-        bottom: 10,
-        right: 10,
+        bottom: 15,
+        right: 15,
         backgroundColor: '#ffffff',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
         width: 50,
         height: 50,
         borderRadius: 5,
@@ -143,7 +168,12 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center'
-    }
+    },
+
+    textContainer: {
+        width: '100%',
+        alignItems: 'center',
+    },
 })
 
 export default TranslatorEspLSC;
