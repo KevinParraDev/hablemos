@@ -4,10 +4,13 @@ import Constants from "expo-constants";
 import { Icon } from '@rneui/themed';
 import VideoCard  from './elements/CardVideo.js';
 import { useNavigation } from "@react-navigation/native";
+import { Modal } from "react-native";
 
 const Dictionary = () => {
 
     const navigation = useNavigation();
+    const [modalVisible, setModalVisible] = React.useState(false);
+    const [selectedCard, setSelectedCard] = React.useState(null);
 
     const cards = [
         {
@@ -52,11 +55,21 @@ const Dictionary = () => {
         },
     ]
 
+    const openModal = (card) => {
+        setSelectedCard(card);
+        setModalVisible(true);
+    };
+
     return (
         <View style={styles.container}>
             <FlatList 
                     data={cards}
-                    renderItem={({item}) => <VideoCard video={item.source} word={item.word} />}
+                    renderItem={ ({item}) => (    
+                        <VideoCard 
+                            video={item.source} 
+                            word={item.word} 
+                            onPress={() => openModal(item)}/>
+                    )}
                     numColumns={2}
                     columnWrapperStyle={styles.viewCard}
                     ListHeaderComponent={
@@ -95,6 +108,49 @@ const Dictionary = () => {
                 >
                 </TouchableOpacity>
             </View>
+            <Modal visible={modalVisible} animationType="slide" transparent={true}>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        {selectedCard && (
+                            <>
+                                <Image source={selectedCard.source} style={styles.modalImage} />
+                                <Text style={styles.modalText}>{selectedCard.word}</Text>
+                            </>
+                        )}
+
+                        <View style={styles.buttonsContainer}>
+                            <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
+                                <Icon 
+                                    name= 'arrow-left'
+                                    type='font-awesome'
+                                    color= '#350066'
+                                    containerStyle={styles.modalIcon}
+                                />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.favoriteButton}>
+                                <Icon 
+                                    name= 'star'
+                                    type='font-awesome'
+                                    color= '#350066'
+                                    containerStyle={styles.favoriteIcon}
+                                />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.modalButton}>
+                                <Icon 
+                                    name= 'share-alt'
+                                    type='font-awesome'
+                                    color= '#350066'
+                                    containerStyle={styles.modalIcon}
+                                />
+                            </TouchableOpacity>
+                        </View>
+
+                        
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -159,6 +215,62 @@ const styles = StyleSheet.create({
         borderRadius:35,
         borderColor: '#350066',
         backgroundColor: '#8d77ed'
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)'
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 20,
+        borderWidth: 3,
+        borderColor: '#350066',
+        // alignItems: 'center'
+    },
+    modalImage: {
+        width: 170,
+        height: 150,
+        borderRadius: 20,
+        borderColor: '#350066',
+        borderWidth: 3
+    },
+    modalText: {
+        color: '#350066',
+        fontSize: 18,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        margin: 5
+    },
+
+    modalIcon: {
+        position: 'absolute',
+        top: 7,
+        left: 7
+    },
+    favoriteIcon: {
+        position: 'absolute',
+        top: 8,
+        right: 8
+    },
+    modalButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 50,
+        backgroundColor: '#808aff',
+        alignContent: 'center',
+        marginTop: 10
+    },
+
+    favoriteButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 50,
+        backgroundColor: '#ff809f',
+        alignContent: 'center',
+        marginTop: 10
     }
 });
 

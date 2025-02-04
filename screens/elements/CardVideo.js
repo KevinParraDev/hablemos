@@ -1,11 +1,11 @@
 import React from "react";
 import { TouchableHighlight ,StyleSheet, View, Text, TextInput, TouchableOpacity, Image, ScrollView} from "react-native";
 
-const VideoCard = ({video, word}) => {
+const VideoCard = ({video, word, onPress }) => {
 
     return (
         <>  
-            <TouchableHighlight style={styles.card}>
+            <TouchableHighlight style={styles.card} onPress={onPress} >
                 <View >
                     <Image source={video} style={styles.video}></Image>
                     <Text style={styles.text}> {word} </Text>
