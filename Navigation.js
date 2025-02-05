@@ -4,6 +4,8 @@ import TranslatorLSCEsp from './screens/TranslatorLSCEsp';
 import { NavigationContainer } from '@react-navigation/native';
 import TranslatorEspLSC from './screens/TranslatorEspLSC';
 import Dictionary from './screens/DictionaryScreen';
+import { StyleSheet } from "react-native";
+import { Icon } from '@rneui/themed';
 
 const StackNavigator = createNativeStackNavigator();
 
@@ -38,12 +40,34 @@ function Navigation(){
                 name='Dictionary'
                 component={Dictionary}
                 options={{
-                    headerShown: false
+                    title: 'Diccionario',
+                    headerStyle: styles.dictionaryHeader,
+                    headerTitleStyle: styles.headerTitle,
+                    headerTitleAlign: 'center',
+                    headerBackVisible: false,
+                    shouldShowHintSearchIcon: true,
+                    headerLeft: () =>
+                        <Icon 
+                            name= 'favorite'
+                            type='material-icons'
+                            color='#b247c1'
+                        />               
                 }}
             />
         </StackNavigator.Navigator>
         </NavigationContainer>
     )
 }
+
+const styles = StyleSheet.create({
+    dictionaryHeader:{
+        backgroundColor: '#ffdbde'
+    },
+    headerTitle: {
+        color: '#350066',
+        fontSize: 20,
+        fontWeight: 'bold'
+    }   
+});
 
 export default Navigation;
