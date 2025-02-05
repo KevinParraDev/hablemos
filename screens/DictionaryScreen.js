@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useLayoutEffect} from "react";
 import { StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, ScrollView} from "react-native";
 import Constants from "expo-constants";
 import { Icon } from '@rneui/themed';
@@ -11,6 +11,8 @@ const Dictionary = () => {
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = React.useState(false);
     const [selectedCard, setSelectedCard] = React.useState(null);
+    const [showSearch, setShowSearch] = React.useState(false);
+    const [showFavorite, setShowFavorite] = React.useState(true);
 
     const cards = [
         {
@@ -60,36 +62,71 @@ const Dictionary = () => {
         setModalVisible(true);
     };
 
+    const handleScroll = (event) => {
+        const scrollY = event.nativeEvent.contentOffset.y;
+        setShowSearch(scrollY > 20);
+    };
+
+    // useLayoutEffect(() => {
+    //     navigation.setOptions({
+    //         headerRight : showFavorite ? () => 
+    //             <Icon 
+    //                 name= 'favorite'
+    //                 type='material-icons'
+    //                 color='#b247c1'
+    //             /> 
+    //         : null
+    //     });
+    // }, [navigation, showFavorite]);
+
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerSearchBarOptions: showSearch  ? {
+                hideNavigationBar: true,
+                inputType: 'text',
+                textColor: '#350066',
+                hintTextColor: '#350066',
+                headerIconColor: '#350066',
+                tintColor: '#350066',
+                placeholder: 'Buscar...',
+                // onFocus: () => setShowFavorite(false),
+                // onBlur: () => setShowFavorite(true),
+            } : undefined,
+        });
+    }, [navigation, showSearch, showFavorite]);
+
     return (
-        <View style={styles.container}>
+        <View style={styles.container} >
             <FlatList 
-                    data={cards}
-                    renderItem={ ({item}) => (    
-                        <VideoCard 
-                            video={item.source} 
-                            word={item.word} 
-                            onPress={() => openModal(item)}/>
-                    )}
-                    numColumns={2}
-                    columnWrapperStyle={styles.viewCard}
-                    ListHeaderComponent={
-                        <View>
-                            <Text style={styles.title}> Diccionario </Text>
-                            <TextInput 
-                                placeholder='Buscar'
-                                inputMode= 'search'
-                                placeholderTextColor='#350066'
-                                onPressIn={() => {}}
-                                style={styles.searchBar}
-                            />
-                            <Icon 
-                                name= 'search'
-                                type='font-awesome'
-                                color= '#350066'
-                                containerStyle={styles.iconSearch}
-                            />
-                        </View>
-                    }
+                data={cards}
+                onScroll={handleScroll}
+                renderItem={ ({item}) => (    
+                    <VideoCard 
+                        video={item.source} 
+                        word={item.word} 
+                        onPress={() => openModal(item)}/>
+                )}
+                numColumns={2}
+                columnWrapperStyle={styles.viewCard}
+                ListHeaderComponent={
+                    <>
+                        <TextInput 
+                            placeholder='Buscar'
+                            inputMode= 'search'
+                            placeholderTextColor='#350066'
+                            enterKeyHint='search'
+                            multiline= {true}
+                            style={styles.searchBar}
+                        />
+                        <Icon 
+                            name= 'search'
+                            type='font-awesome'
+                            color= '#350066'
+                            containerStyle={styles.iconSearch}
+                        />
+                    </>
+                }
             />
             <View style={styles.buttonsContainer}>
                 <TouchableOpacity
@@ -159,17 +196,10 @@ const styles = StyleSheet.create({
     container:{
         flex: 1,
         backgroundColor: '#ffdbde',
-        paddingTop: Constants.statusBarHeight,
-    },
-    title: {
-        color: '#350066',
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginTop:30,
-        marginBottom:30
     },
     searchBar:{
+        height: 50,
+        marginTop: 30,
         marginStart: 30,
         marginEnd: 30,
         borderColor: '#350066',
@@ -180,10 +210,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlignVertical: 'center',
         color: '#350066',
+        paddingLeft: 15,
     },
     iconSearch: {
         position: 'absolute',
-        top: 100,
+        marginTop: 40,
         right: 40
     },
     viewCard: {
@@ -196,8 +227,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        margin: 10,
-        backgroundColor: 'transparent'
+        // backgroundColor: 'transparent'
     },
     sideButtons: {
         width: 45,
