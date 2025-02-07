@@ -1,10 +1,8 @@
-import React, {useLayoutEffect} from "react";
-import { StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, ScrollView} from "react-native";
-import Constants from "expo-constants";
+import React, {useLayoutEffect, useEffect, useRef} from "react";
+import { Animated, StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, Modal} from "react-native";
 import { Icon } from '@rneui/themed';
-import VideoCard  from './elements/CardVideo.js';
+import AnimatedVideoCard  from './elements/CardVideo.js';
 import { useNavigation } from "@react-navigation/native";
-import { Modal } from "react-native";
 
 const Dictionary = () => {
 
@@ -67,46 +65,31 @@ const Dictionary = () => {
         setShowSearch(scrollY > 20);
     };
 
-    // useLayoutEffect(() => {
-    //     navigation.setOptions({
-    //         headerRight : showFavorite ? () => 
-    //             <Icon 
-    //                 name= 'favorite'
-    //                 type='material-icons'
-    //                 color='#b247c1'
-    //             /> 
-    //         : null
-    //     });
-    // }, [navigation, showFavorite]);
-
-
-    useLayoutEffect(() => {
+    useEffect(() => {
         navigation.setOptions({
             headerSearchBarOptions: showSearch  ? {
-                hideNavigationBar: true,
                 inputType: 'text',
                 textColor: '#350066',
                 hintTextColor: '#350066',
                 headerIconColor: '#350066',
                 tintColor: '#350066',
                 placeholder: 'Buscar...',
-                // onFocus: () => setShowFavorite(false),
-                // onBlur: () => setShowFavorite(true),
-            } : undefined,
+            } : undefined
         });
-    }, [navigation, showSearch, showFavorite]);
+    }, [navigation, showSearch]);
 
     return (
         <View style={styles.container} >
             <FlatList 
                 data={cards}
                 onScroll={handleScroll}
-                renderItem={ ({item}) => (    
-                    <VideoCard 
+                renderItem={ ({item, index}) =>    
+                    <AnimatedVideoCard 
                         video={item.source} 
                         word={item.word} 
-                        onPress={() => openModal(item)}/>
-                )}
+                        onPress={() => openModal(item)}
+                        index={index}/>
+                }
                 numColumns={2}
                 columnWrapperStyle={styles.viewCard}
                 ListHeaderComponent={
@@ -116,7 +99,7 @@ const Dictionary = () => {
                             inputMode= 'search'
                             placeholderTextColor='#350066'
                             enterKeyHint='search'
-                            multiline= {true}
+                            maxLength={30}
                             style={styles.searchBar}
                         />
                         <Icon 
@@ -183,8 +166,6 @@ const Dictionary = () => {
                                 />
                             </TouchableOpacity>
                         </View>
-
-                        
                     </View>
                 </View>
             </Modal>
@@ -211,6 +192,7 @@ const styles = StyleSheet.create({
         textAlignVertical: 'center',
         color: '#350066',
         paddingLeft: 15,
+        paddingRight: 40,
     },
     iconSearch: {
         position: 'absolute',
@@ -223,11 +205,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
     },
     buttonsContainer: {
+        position: 'absolute',
+        width: '100%',
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-around',
         alignItems: 'center',
-        // backgroundColor: 'transparent'
+        justifyContent: 'space-evenly', 
+        bottom: 10
     },
     sideButtons: {
         width: 45,
@@ -258,7 +242,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         borderWidth: 3,
         borderColor: '#350066',
-        // alignItems: 'center'
+        alignItems: 'center'
     },
     modalImage: {
         width: 170,

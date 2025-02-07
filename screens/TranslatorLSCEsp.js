@@ -3,7 +3,7 @@ import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, Keyboard} f
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants"
 import { Icon } from '@rneui/themed';
-import { ScrollView } from "react-native-web";
+// import { ScrollView } from "react-native-web";
 
 //import { Camera, useCameraDevice, useCameraPermission } from "react-native-vision-camera";
 // en dependencies en el package.json "react-native-vision-camera": "^4.6.3"
