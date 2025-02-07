@@ -1,7 +1,7 @@
-import React, {useRef} from "react";
-import { TouchableHighlight ,StyleSheet, View, Text, Image, Animated, useEffect} from "react-native";
+import React, {useRef, useEffect} from "react";
+import { TouchableHighlight ,StyleSheet, View, Text, Image, Animated} from "react-native";
 
-const VideoCard = ({video, word, onPress }) => {
+export const VideoCard = ({video, word, onPress }) => {
 
     return (
         <TouchableHighlight style={styles.card} onPress={onPress} >
@@ -13,14 +13,14 @@ const VideoCard = ({video, word, onPress }) => {
     );
 }
 
-const AnimatedVideoCard = ({video, word, onPress, index}) => {
+export const AnimatedVideoCard = ({video, word, onPress, index}) => {
     const opacity = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         Animated.timing(opacity,{
             toValue: 1,
-            duration: 500,
-            delay: index * 500,
+            duration: 1000,
+            delay: index * 300,
             useNativeDriver: true
         }).start();
     }, [opacity, index]);
@@ -58,5 +58,3 @@ const styles = StyleSheet.create({
         margin: 5
     }
 });
-
-export default AnimatedVideoCard;

@@ -1,59 +1,61 @@
-import React, {useLayoutEffect, useEffect, useRef} from "react";
-import { Animated, StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, Modal} from "react-native";
+import React, {useEffect} from "react";
+import { StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, Modal} from "react-native";
 import { Icon } from '@rneui/themed';
-import AnimatedVideoCard  from './elements/CardVideo.js';
+import {AnimatedVideoCard}  from './elements/CardVideo.js';
 import { useNavigation } from "@react-navigation/native";
+
+const cardsExample = [
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Palabra'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Hola'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Cama'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Movil'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Adios'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Carro'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Casa'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Papa'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Tomate'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Computador'
+    },
+]
 
 const Dictionary = () => {
 
     const navigation = useNavigation();
+    const [cards, setCards] = React.useState();
     const [modalVisible, setModalVisible] = React.useState(false);
     const [selectedCard, setSelectedCard] = React.useState(null);
     const [showSearch, setShowSearch] = React.useState(false);
-    const [showFavorite, setShowFavorite] = React.useState(true);
-
-    const cards = [
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-    ]
+    const [searchQuery, setSearchQuery] = React.useState('');
+    // const [showFavorite, setShowFavorite] = React.useState(true);
 
     const openModal = (card) => {
         setSelectedCard(card);
@@ -66,6 +68,20 @@ const Dictionary = () => {
     };
 
     useEffect(() => {
+
+        if(searchQuery === ''){
+            setCards(cardsExample);
+        }else{
+            const filteredCards = cardsExample.filter((item) => 
+                item.word.toLowerCase().startsWith(searchQuery.toLowerCase())
+            );
+    
+            setCards([{source: require('../assets/images/imageTest.png'), word: searchQuery}]);
+        }
+
+    }, [searchQuery]);
+
+    useEffect(() => {
         navigation.setOptions({
             headerSearchBarOptions: showSearch  ? {
                 inputType: 'text',
@@ -74,6 +90,7 @@ const Dictionary = () => {
                 headerIconColor: '#350066',
                 tintColor: '#350066',
                 placeholder: 'Buscar...',
+                onChangeText:(event) => setSearchQuery(event.nativeEvent.text)
             } : undefined
         });
     }, [navigation, showSearch]);
@@ -83,23 +100,26 @@ const Dictionary = () => {
             <FlatList 
                 data={cards}
                 onScroll={handleScroll}
+                keyExtractor={(item) => item.word}
                 renderItem={ ({item, index}) =>    
                     <AnimatedVideoCard 
                         video={item.source} 
                         word={item.word} 
                         onPress={() => openModal(item)}
-                        index={index}/>
+                        index={index}
+                    />
                 }
                 numColumns={2}
                 columnWrapperStyle={styles.viewCard}
                 ListHeaderComponent={
                     <>
                         <TextInput 
-                            placeholder='Buscar'
+                            placeholder='Buscar...'
                             inputMode= 'search'
                             placeholderTextColor='#350066'
                             enterKeyHint='search'
                             maxLength={30}
+                            onChangeText={(search) => setSearchQuery(search)}
                             style={styles.searchBar}
                         />
                         <Icon 
