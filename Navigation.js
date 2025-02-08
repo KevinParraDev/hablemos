@@ -7,68 +7,77 @@ import Dictionary from './screens/DictionaryScreen';
 import FavoriteScreen from './screens/FavoriteScreen';
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Icon } from '@rneui/themed';
+import { FavoritesProvider } from './screens/context/FavoritesContext';
 
 const StackNavigator = createNativeStackNavigator();
 
 function Navigation(){
     return (
-        <NavigationContainer>
-            <StackNavigator.Navigator
-            initialRouteName='Home'
-            >
-            <StackNavigator.Screen
-                name='Home'
-                component={HomeScreen}
-                options={{
-                    headerShown: false
-                }}
-            />
-            <StackNavigator.Screen
-                name='TranslatorLSCEsp'
-                component={TranslatorLSCEsp}
-                options={{
-                    headerShown: false
-                }}
-            />
-            <StackNavigator.Screen
-                name='TranslatorEspLSC'
-                component={TranslatorEspLSC}
-                options={{
-                    headerShown: false
-                }}
-            />
-            <StackNavigator.Screen
-                name='Favorite'
-                component={FavoriteScreen}
-                options={{
-                    headerShown: false
-                }}
-            />
-            <StackNavigator.Screen
-                name='Dictionary'
-                component={Dictionary}
-                options={ ({navigation}) => ({
-                    title: 'Diccionario',
-                    headerStyle: styles.dictionaryHeader,
-                    headerTitleStyle: styles.headerTitle,
-                    headerTitleAlign: 'center',
-                    headerBackVisible: false,
-                    shouldShowHintSearchIcon: true,
-                    headerLeft: () =>
-                        <TouchableOpacity 
-                            style={styles.favoriteIcon}
-                            onPress={() => navigation.navigate('Favorite')}
-                        >
-                            <Icon 
-                                name= 'favorite'
-                                type='material-icons'
-                                color='#b247c1'
-                            />  
-                        </TouchableOpacity>
-                })}
-            />
-            </StackNavigator.Navigator>
-        </NavigationContainer>
+        <FavoritesProvider>
+            <NavigationContainer>
+                <StackNavigator.Navigator
+                initialRouteName='Home'
+                >
+                <StackNavigator.Screen
+                    name='Home'
+                    component={HomeScreen}
+                    options={{
+                        headerShown: false
+                    }}
+                />
+                <StackNavigator.Screen
+                    name='TranslatorLSCEsp'
+                    component={TranslatorLSCEsp}
+                    options={{
+                        headerShown: false
+                    }}
+                />
+                <StackNavigator.Screen
+                    name='TranslatorEspLSC'
+                    component={TranslatorEspLSC}
+                    options={{
+                        headerShown: false
+                    }}
+                />
+                <StackNavigator.Screen
+                    name='Favorite'
+                    component={FavoriteScreen}
+                    options={({navigation}) => ({
+                    
+                        title: 'Favoritos',
+                        headerStyle: styles.dictionaryHeader,
+                        headerTitleStyle: styles.headerTitle,
+                        headerTitleAlign: 'center',
+                        headerBackVisible: true,
+                        shouldShowHintSearchIcon: true,
+                    })}
+                />
+                <StackNavigator.Screen
+                    name='Dictionary'
+                    component={Dictionary}
+                    options={ ({navigation}) => ({
+                        title: 'Diccionario',
+                        headerStyle: styles.dictionaryHeader,
+                        headerTitleStyle: styles.headerTitle,
+                        headerTitleAlign: 'center',
+                        headerBackVisible: false, style: styles.backButton,
+                        shouldShowHintSearchIcon: true,
+                        headerLeft: () =>
+                            <TouchableOpacity 
+                                style={styles.favoriteIcon}
+                                onPress={() => navigation.navigate('Favorite')}
+                            >
+                                <Icon 
+                                    name= 'favorite'
+                                    type='material-icons'
+                                    color='#b247c1'
+                                />  
+                            </TouchableOpacity>
+                    })}
+                />
+                </StackNavigator.Navigator>
+            </NavigationContainer>
+        </FavoritesProvider>
     )
 }
 

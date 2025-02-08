@@ -3,6 +3,11 @@ import { StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, Mo
 import { Icon } from '@rneui/themed';
 import {AnimatedVideoCard}  from './elements/CardVideo.js';
 import { useNavigation } from "@react-navigation/native";
+import { useState } from "react";
+import { useContext } from "react";
+import { FavoritesContext } from "./context/FavoritesContext";
+// import { Alert } from "react-native";
+
 
 const cardsExample = [
     {
@@ -55,7 +60,8 @@ const Dictionary = () => {
     const [selectedCard, setSelectedCard] = React.useState(null);
     const [showSearch, setShowSearch] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState('');
-    // const [showFavorite, setShowFavorite] = React.useState(true);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const { favorites, addToFavorites } = useContext(FavoritesContext);
 
     const openModal = (card) => {
         setSelectedCard(card);
@@ -94,6 +100,25 @@ const Dictionary = () => {
             } : undefined
         });
     }, [navigation, showSearch]);
+
+    useEffect(() => {
+        if (selectedCard) {
+            setIsFavorite(favorites.some(fav => fav.word === selectedCard.word));
+        }
+    }, [selectedCard, favorites]);
+
+    const handleAddToFavorites = () => {
+        if (isFavorite) {
+            // Alert.alert("Ya está en favoritos", "La seña ya se encuentra en tu lista de favoritos.");
+            window.alert("La seña ya se encuentra en favoritos");
+            return;
+        }
+        addToFavorites(selectedCard);
+        setIsFavorite(true);
+        // Alert.alert("Añadida a favoritos", "La seña se ha guardado en tu lista de favoritos.");
+        window.alert("Añadida a favoritos");
+
+    };
 
     return (
         <View style={styles.container} >
@@ -158,7 +183,7 @@ const Dictionary = () => {
                             </>
                         )}
 
-                        <View style={styles.buttonsContainer}>
+                        <View style={styles.buttonsMContainer}>
                             <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
                                 <Icon 
                                     name= 'arrow-left'
@@ -168,7 +193,7 @@ const Dictionary = () => {
                                 />
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.favoriteButton}>
+                            <TouchableOpacity style={styles.favoriteButton} onPress={handleAddToFavorites}>
                                 <Icon 
                                     name= 'star'
                                     type='font-awesome'
@@ -257,6 +282,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.5)'
     },
     modalContent: {
+        width: '80%',
+        height: '53%',
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 20,
@@ -265,42 +292,51 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     modalImage: {
-        width: 170,
-        height: 150,
+        width: 250,
+        height: 290,
         borderRadius: 20,
         borderColor: '#350066',
-        borderWidth: 3
+        borderWidth: 3,
+        top: 10
     },
     modalText: {
         color: '#350066',
-        fontSize: 18,
+        fontSize: 24,
+        padding: 15,
+        top: 10,    
         fontWeight: 'bold',
         textAlign: 'center',
         margin: 5
     },
-
+    buttonsMContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        width: '80%'
+    },
     modalIcon: {
         position: 'absolute',
-        top: 7,
-        left: 7
+        top: 11,
+        left: 13
     },
     favoriteIcon: {
         position: 'absolute',
-        top: 8,
-        right: 8
+        top: 11,
+        right: 14
     },
     modalButton: {
-        width: 40,
-        height: 40,
+        width: 50,
+        height: 50,
         borderRadius: 50,
         backgroundColor: '#808aff',
         alignContent: 'center',
-        marginTop: 10
+        padding: 10,
+        marginTop: 15
     },
-
     favoriteButton: {
-        width: 40,
-        height: 40,
+        width: 50,
+        height: 50,
         borderRadius: 50,
         backgroundColor: '#ff809f',
         alignContent: 'center',
