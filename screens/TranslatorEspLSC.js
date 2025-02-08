@@ -39,7 +39,6 @@ const TranslatorEspLSC = () => {
                     />
                 </TouchableOpacity>
             </View>
-<<<<<<< Updated upstream
             
 
             <View style = {styles.textContainer}>
@@ -64,19 +63,6 @@ const TranslatorEspLSC = () => {
                 </TouchableOpacity>
             </View>
 
-=======
-            <Text style={styles.subtitle}>Texto - Audio</Text>
-            <TextInput
-                style={styles.textarea}
-                value={text}
-                onChangeText={setText}
-                placeholder="Escribe aquí123..."
-                placeholderTextColor="#350066"
-                multiline={true} // Permite múltiples líneas
-                numberOfLines={4} // Define una altura inicial (opcional)
-                textAlignVertical="top" // Alinea el texto en la parte superior
-            />
->>>>>>> Stashed changes
             <View style={styles.bottomButtons}>
                 <View style={styles.buttonsContainer}>
                     <TouchableOpacity
@@ -88,11 +74,7 @@ const TranslatorEspLSC = () => {
                 <View style={styles.buttonsContainer}>
                     <TouchableOpacity
                         style={styles.centerButton}
-<<<<<<< Updated upstream
-                        onPress={() => navigation.navigate("TranslatorLSCEsp")}
-=======
-                        onPress={showAlert}
->>>>>>> Stashed changes
+                        onPress={() => showAlert()}
                     >
                     </TouchableOpacity>
                 </View>
