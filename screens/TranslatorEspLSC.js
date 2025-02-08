@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, KeyboardAvoidingView, ScrollView, Platform} from "react-native";
+import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, KeyboardAvoidingView, ScrollView, Platform, Alert} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants"
 import { Icon } from '@rneui/themed';
@@ -10,6 +10,14 @@ const TranslatorEspLSC = () => {
 
     const navigation = useNavigation();
     const [text, setText] = useState('');
+
+    const showAlert = () => {
+        if (text.trim() === "") {
+            Alert.alert("Aviso", "Por favor, ingresa un texto antes de continuar.");
+        } else {
+            Alert.alert("Texto ingresado", text);
+        }
+    };
 
     return (
         <KeyboardAvoidingView
@@ -31,6 +39,7 @@ const TranslatorEspLSC = () => {
                     />
                 </TouchableOpacity>
             </View>
+<<<<<<< Updated upstream
             
 
             <View style = {styles.textContainer}>
@@ -55,6 +64,19 @@ const TranslatorEspLSC = () => {
                 </TouchableOpacity>
             </View>
 
+=======
+            <Text style={styles.subtitle}>Texto - Audio</Text>
+            <TextInput
+                style={styles.textarea}
+                value={text}
+                onChangeText={setText}
+                placeholder="Escribe aquí123..."
+                placeholderTextColor="#350066"
+                multiline={true} // Permite múltiples líneas
+                numberOfLines={4} // Define una altura inicial (opcional)
+                textAlignVertical="top" // Alinea el texto en la parte superior
+            />
+>>>>>>> Stashed changes
             <View style={styles.bottomButtons}>
                 <View style={styles.buttonsContainer}>
                     <TouchableOpacity
@@ -66,7 +88,11 @@ const TranslatorEspLSC = () => {
                 <View style={styles.buttonsContainer}>
                     <TouchableOpacity
                         style={styles.centerButton}
+<<<<<<< Updated upstream
                         onPress={() => navigation.navigate("TranslatorLSCEsp")}
+=======
+                        onPress={showAlert}
+>>>>>>> Stashed changes
                     >
                     </TouchableOpacity>
                 </View>

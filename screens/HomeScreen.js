@@ -1,7 +1,26 @@
 import React from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Image} from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Constants from "expo-constants"
+import Constants from "expo-constants";
+import  {db}  from "../src/firebaseConfig";
+import { collection, addDoc } from "firebase/firestore";
+
+
+const addUser = async () => {
+    try {
+        const docRef = await addDoc(collection(db, "users"), {
+            name: "David Ramírez",
+            age: 24,
+            email: "david@unal.edu.co",
+        });
+        console.log("Usuario agregado con ID:", docRef.id);
+    } catch (error) {
+        console.error("Error agregando usuario:", error);
+    }
+};
+
+// Llama a la función para probar
+addUser();
 
 const homeVideo = require('../assets/images/imageTest.png')
 
