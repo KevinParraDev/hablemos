@@ -1,61 +1,67 @@
-import React, {useLayoutEffect} from "react";
-import { StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, ScrollView} from "react-native";
-import Constants from "expo-constants";
+import React, {useEffect, useLayoutEffect} from "react";
+import { StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, Modal} from "react-native";
 import { Icon } from '@rneui/themed';
-import VideoCard  from './elements/CardVideo.js';
+import {AnimatedVideoCard}  from './elements/CardVideo.js';
 import { useNavigation } from "@react-navigation/native";
-import { Modal } from "react-native";
+import { useState } from "react";
+import { useContext } from "react";
+import { FavoritesContext } from "./context/FavoritesContext";
+// import { Alert } from "react-native";
+
+
+const cardsExample = [
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Palabra'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Hola'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Cama'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Movil'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Adios'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Carro'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Casa'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Papa'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Tomate'
+    },
+    {
+        source: require('../assets/images/imageTest.png'),
+        word: 'Computador'
+    },
+]
 
 const Dictionary = () => {
 
     const navigation = useNavigation();
+    const [cards, setCards] = React.useState();
     const [modalVisible, setModalVisible] = React.useState(false);
     const [selectedCard, setSelectedCard] = React.useState(null);
     const [showSearch, setShowSearch] = React.useState(false);
-    const [showFavorite, setShowFavorite] = React.useState(true);
-
-    const cards = [
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-        {
-            source: require('../assets/images/imageTest.png'),
-            word: 'Palabra'
-        },
-    ]
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const [isFavorite, setIsFavorite] = useState(false);
+    const { favorites, addToFavorites } = useContext(FavoritesContext);
 
     const openModal = (card) => {
         setSelectedCard(card);
@@ -67,56 +73,81 @@ const Dictionary = () => {
         setShowSearch(scrollY > 20);
     };
 
-    // useLayoutEffect(() => {
-    //     navigation.setOptions({
-    //         headerRight : showFavorite ? () => 
-    //             <Icon 
-    //                 name= 'favorite'
-    //                 type='material-icons'
-    //                 color='#b247c1'
-    //             /> 
-    //         : null
-    //     });
-    // }, [navigation, showFavorite]);
+    useEffect(() => {
 
+        if(searchQuery === ''){
+            setCards(cardsExample);
+        }else{
+            const filteredCards = cardsExample.filter((item) => 
+                item.word.toLowerCase().startsWith(searchQuery.toLowerCase())
+            );
+    
+            setCards(filteredCards);
+        }
 
-    useLayoutEffect(() => {
+    }, [searchQuery]);
+
+    useEffect(() => {
         navigation.setOptions({
             headerSearchBarOptions: showSearch  ? {
-                hideNavigationBar: true,
                 inputType: 'text',
                 textColor: '#350066',
                 hintTextColor: '#350066',
                 headerIconColor: '#350066',
                 tintColor: '#350066',
                 placeholder: 'Buscar...',
-                // onFocus: () => setShowFavorite(false),
-                // onBlur: () => setShowFavorite(true),
-            } : undefined,
+                onChangeText:(event) => {
+                    const text = event.nativeEvent.text;
+                    setSearchQuery(text);
+                },
+            } : undefined
         });
-    }, [navigation, showSearch, showFavorite]);
+    }, [navigation, showSearch]);
+
+    useEffect(() => {
+        if (selectedCard) {
+            setIsFavorite(favorites.some(fav => fav.word === selectedCard.word));
+        }
+    }, [selectedCard, favorites]);
+
+    const handleAddToFavorites = () => {
+        if (isFavorite) {
+            // Alert.alert("Ya está en favoritos", "La seña ya se encuentra en tu lista de favoritos.");
+            window.alert("La seña ya se encuentra en favoritos");
+            return;
+        }
+        addToFavorites(selectedCard);
+        setIsFavorite(true);
+        // Alert.alert("Añadida a favoritos", "La seña se ha guardado en tu lista de favoritos.");
+        window.alert("Añadida a favoritos");
+
+    };
 
     return (
         <View style={styles.container} >
             <FlatList 
                 data={cards}
                 onScroll={handleScroll}
-                renderItem={ ({item}) => (    
-                    <VideoCard 
+                keyExtractor={(item) => item.word}
+                renderItem={ ({item, index}) =>    
+                    <AnimatedVideoCard 
                         video={item.source} 
                         word={item.word} 
-                        onPress={() => openModal(item)}/>
-                )}
+                        onPress={() => openModal(item)}
+                        index={index}
+                    />
+                }
                 numColumns={2}
                 columnWrapperStyle={styles.viewCard}
                 ListHeaderComponent={
                     <>
                         <TextInput 
-                            placeholder='Buscar'
+                            placeholder='Buscar...'
                             inputMode= 'search'
                             placeholderTextColor='#350066'
                             enterKeyHint='search'
-                            multiline= {true}
+                            maxLength={30}
+                            onChangeText={(search) => setSearchQuery(search)}
                             style={styles.searchBar}
                         />
                         <Icon 
@@ -155,7 +186,7 @@ const Dictionary = () => {
                             </>
                         )}
 
-                        <View style={styles.buttonsContainer}>
+                        <View style={styles.buttonsMContainer}>
                             <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
                                 <Icon 
                                     name= 'arrow-left'
@@ -165,7 +196,7 @@ const Dictionary = () => {
                                 />
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.favoriteButton}>
+                            <TouchableOpacity style={styles.favoriteButton} onPress={handleAddToFavorites}>
                                 <Icon 
                                     name= 'star'
                                     type='font-awesome'
@@ -183,8 +214,6 @@ const Dictionary = () => {
                                 />
                             </TouchableOpacity>
                         </View>
-
-                        
                     </View>
                 </View>
             </Modal>
@@ -211,6 +240,7 @@ const styles = StyleSheet.create({
         textAlignVertical: 'center',
         color: '#350066',
         paddingLeft: 15,
+        paddingRight: 40,
     },
     iconSearch: {
         position: 'absolute',
@@ -223,11 +253,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
     },
     buttonsContainer: {
+        position: 'absolute',
+        width: '100%',
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-around',
         alignItems: 'center',
-        // backgroundColor: 'transparent'
+        justifyContent: 'space-evenly', 
+        bottom: 10
     },
     sideButtons: {
         width: 45,
@@ -253,50 +285,61 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.5)'
     },
     modalContent: {
+        width: '80%',
+        height: '53%',
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 20,
         borderWidth: 3,
         borderColor: '#350066',
-        // alignItems: 'center'
+        alignItems: 'center'
     },
     modalImage: {
-        width: 170,
-        height: 150,
+        width: 250,
+        height: 290,
         borderRadius: 20,
         borderColor: '#350066',
-        borderWidth: 3
+        borderWidth: 3,
+        top: 10
     },
     modalText: {
         color: '#350066',
-        fontSize: 18,
+        fontSize: 24,
+        padding: 15,
+        top: 10,    
         fontWeight: 'bold',
         textAlign: 'center',
         margin: 5
     },
-
+    buttonsMContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        width: '80%'
+    },
     modalIcon: {
         position: 'absolute',
-        top: 7,
-        left: 7
+        top: 11,
+        left: 13
     },
     favoriteIcon: {
         position: 'absolute',
-        top: 8,
-        right: 8
+        top: 11,
+        right: 14
     },
     modalButton: {
-        width: 40,
-        height: 40,
+        width: 50,
+        height: 50,
         borderRadius: 50,
         backgroundColor: '#808aff',
         alignContent: 'center',
-        marginTop: 10
+        padding: 10,
+        marginTop: 15
     },
-
     favoriteButton: {
-        width: 40,
-        height: 40,
+        width: 50,
+        height: 50,
         borderRadius: 50,
         backgroundColor: '#ff809f',
         alignContent: 'center',

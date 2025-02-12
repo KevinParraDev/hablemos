@@ -1,19 +1,36 @@
-import React from "react";
-import { TouchableHighlight ,StyleSheet, View, Text, TextInput, TouchableOpacity, Image, ScrollView} from "react-native";
+import React, {useRef, useEffect} from "react";
+import { TouchableHighlight ,StyleSheet, View, Text, Image, Animated} from "react-native";
 
-const VideoCard = ({video, word, onPress }) => {
+export const VideoCard = ({video, word, onPress }) => {
 
     return (
-        <>  
-            <TouchableHighlight style={styles.card} onPress={onPress} >
-                <View >
-                    <Image source={video} style={styles.video}></Image>
-                    <Text style={styles.text}> {word} </Text>
-                </View>
-            </TouchableHighlight>
-        </>
+        <TouchableHighlight style={styles.card} onPress={onPress} >
+            <View >
+                <Image source={video} style={styles.video}></Image>
+                <Text style={styles.text}> {word} </Text>
+            </View>
+        </TouchableHighlight>
     );
 }
+
+export const AnimatedVideoCard = ({video, word, onPress, index}) => {
+    const opacity = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(opacity,{
+            toValue: 1,
+            duration: 1000,
+            delay: index * 300,
+            useNativeDriver: true
+        }).start();
+    }, [opacity, index]);
+
+    return (
+        <Animated.View style={{opacity}}>
+            <VideoCard video={video} word={word} onPress={onPress}></VideoCard>
+        </Animated.View>
+    );
+};
 
 const styles = StyleSheet.create({
     card: {
@@ -41,5 +58,3 @@ const styles = StyleSheet.create({
         margin: 5
     }
 });
-
-export default VideoCard;
