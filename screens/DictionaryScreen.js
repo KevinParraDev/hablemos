@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useLayoutEffect} from "react";
 import { StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, Modal} from "react-native";
 import { Icon } from '@rneui/themed';
 import {AnimatedVideoCard}  from './elements/CardVideo.js';
@@ -82,7 +82,7 @@ const Dictionary = () => {
                 item.word.toLowerCase().startsWith(searchQuery.toLowerCase())
             );
     
-            setCards([{source: require('../assets/images/imageTest.png'), word: searchQuery}]);
+            setCards(filteredCards);
         }
 
     }, [searchQuery]);
@@ -96,7 +96,10 @@ const Dictionary = () => {
                 headerIconColor: '#350066',
                 tintColor: '#350066',
                 placeholder: 'Buscar...',
-                onChangeText:(event) => setSearchQuery(event.nativeEvent.text)
+                onChangeText:(event) => {
+                    const text = event.nativeEvent.text;
+                    setSearchQuery(text);
+                },
             } : undefined
         });
     }, [navigation, showSearch]);

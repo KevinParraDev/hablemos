@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, Keyboard} from "react-native";
+import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, Keyboard, ScrollView} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants"
 import { Icon } from '@rneui/themed';
