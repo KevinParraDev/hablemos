@@ -3,9 +3,7 @@ import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, Keyboard, S
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants"
 import { Icon } from '@rneui/themed';
-import { ScrollView } from "react-native-web";
-
-//import { Camera, useCameraDevice, useCameraPermission } from "react-native-vision-camera";
+import { Camera, useCameraDevice, useCameraPermission} from "react-native-vision-camera";
 // en dependencies en el package.json "react-native-vision-camera": "^4.6.3"
 
 const lscVideo = require('../assets/images/imageTest.png')
@@ -17,16 +15,16 @@ const TranslatorLSCEsp = () => {
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const [words, setWords] = useState([]);
 
-    //const device = useCameraDevice('back');
-    //const { hasPermission, setHasPermission} = useCameraPermission(false);
+    const device = useCameraDevice('back');
+    const { hasPermission, setHasPermission} = useCameraPermission(false);
 
     useEffect(() => {
         const showSubscription = Keyboard.addListener("keyboardDidShow", () => setIsKeyboardOpen(true));
         const hideSubscription = Keyboard.addListener("keyboardDidHide", () => setIsKeyboardOpen(false));
         
-        //Camera.requestCameraPermission().then((permission) => {
-        //    setHasPermission(permission === 'granted');
-        //});
+        Camera.requestCameraPermission().then((permission) => {
+            setHasPermission(permission === 'granted');
+        });
 
         const interval = setInterval(() => {
             let signs = ['Hola', 'Amigo', '¿Cómo estás?', 'Bien']
@@ -49,24 +47,10 @@ const TranslatorLSCEsp = () => {
             opacity: baseOpacity < 1 ? baseOpacity : 1
         }
     }
-
     return (
         <View style={styles.container}>
             {!isKeyboardOpen && (
                 <View style={styles.lscContainer}>
-                {/*<View style={styles.lscContainer}>
-                    {/*
-                    {!hasPermission && <Text style={styles.subtitle}>No hay permiso de la cámara</Text>}
-                    {hasPermission && device != null && (
-                        <Camera
-                        style={styles.lscVideo}
-                        device={device}
-                        isActive={true}
-                        />
-                    )}
-                    <TouchableOpacity style={styles.button}>
-                    </TouchableOpacity>
-                </View>*/}
                     <ScrollView horizontal={true} style={styles.scrollView}>
                         {words.map((word, index) => (
                             <View key={index} style={getBubbleStyle(index)}>
@@ -74,11 +58,22 @@ const TranslatorLSCEsp = () => {
                             </View>
                         ))}
                     </ScrollView>
-
-                    <Image 
+                    <View style={styles.lscVideo}>
+                        {!hasPermission && <Text style={styles.subtitle}>No hay permiso de la cámara</Text>}
+                        {hasPermission && device != null && (
+                            <Camera
+                            style={styles.lscVideo}
+                            device={device}
+                            isActive={true}
+                            />
+                        )}
+                        <TouchableOpacity style={styles.button}>
+                        </TouchableOpacity>
+                    </View>
+                    {/* <Image 
                         style={styles.lscVideo}
                         source={lscVideo}
-                    />
+                    /> */}
                 </View>
             )}
 

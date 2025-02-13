@@ -86,7 +86,7 @@ const TranslatorEspLSC = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-        </ScrollView>
+        </ScrollView> 
         </KeyboardAvoidingView>
     )
 }
