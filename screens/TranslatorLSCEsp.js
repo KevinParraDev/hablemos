@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, Keyboard, ScrollView} from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Constants from "expo-constants"
 import { Icon } from '@rneui/themed';
 import { Camera, useCameraDevice, useCameraPermission} from "react-native-vision-camera";
-// en dependencies en el package.json "react-native-vision-camera": "^4.6.3"
 
 const lscVideo = require('../assets/images/imageTest.png')
 
@@ -31,12 +29,13 @@ const TranslatorLSCEsp = () => {
             let randomWord = signs[Math.floor(Math.random() * signs.length)];
             setWords(prevWords => {
                 const newWords = [...prevWords, randomWord];
-                return newWords.slice(-4).reverse();
-            })}, 2000);
+                return newWords.slice(-3).reverse();
+            })}, 3000);
 
         return () => {
-        showSubscription.remove();
-        hideSubscription.remove();
+            showSubscription.remove();
+            hideSubscription.remove();
+            clearInterval(interval);
         };
     }, []);
 
@@ -58,7 +57,7 @@ const TranslatorLSCEsp = () => {
                             </View>
                         ))}
                     </ScrollView>
-                    <View style={styles.lscVideo}>
+                    <View style = {styles.lscVideoContainer}>
                         {!hasPermission && <Text style={styles.subtitle}>No hay permiso de la cámara</Text>}
                         {hasPermission && device != null && (
                             <Camera
@@ -67,13 +66,7 @@ const TranslatorLSCEsp = () => {
                             isActive={true}
                             />
                         )}
-                        <TouchableOpacity style={styles.button}>
-                        </TouchableOpacity>
                     </View>
-                    {/* <Image 
-                        style={styles.lscVideo}
-                        source={lscVideo}
-                    /> */}
                 </View>
             )}
 
@@ -99,30 +92,26 @@ const TranslatorLSCEsp = () => {
                     />
                 </TouchableOpacity>
             </View>
+            
+            <View style={styles.buttonsContainer}>
+                <TouchableOpacity
+                    style={styles.sideButtons}
+                    onPress={() => navigation.navigate('Home')}
+                >
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={styles.centerButton}
+                    onPress={() => navigation.navigate('TranslatorEspLSC')}
+                >
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.sideButtons}
+                    onPress={() => navigation.navigate('Dictionary')}
+                >
+                </TouchableOpacity>
+            </View>
+            
         
-            <View style={styles.bottomButtons}>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={styles.otherButton}
-                        onPress={() => navigation.navigate("Home")}
-                    >
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={styles.centerButton}
-                        onPress={() => navigation.navigate("TranslatorEspLSC")}
-                    >
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={styles.otherButton}
-                        onPress={() => navigation.navigate("Dictionary")}
-                    >
-                    </TouchableOpacity>
-                </View>
-        </View>
         </View>
     )
 }
@@ -130,17 +119,16 @@ const TranslatorLSCEsp = () => {
 const styles = StyleSheet.create({
     container:  {
         flex: 1,
-        padding: 20,
-        paddingTop: Constants.statusBarHeight,
+        paddingTop: 0,
+        padding: 30,
         backgroundColor: '#d7e6fa',
         alignItems: 'center',
         justifyContent: 'center'
     },
 
     lscContainer: {
-        marginTop: 10,
         width: '100%',
-        height: 500,
+        height: 400,
         alignItems: 'center',
         position: 'relative'
     },
@@ -148,21 +136,29 @@ const styles = StyleSheet.create({
     interpretationContainer: {
         width: '100%',
         alignItems: 'center',
+        padingTop: 5,
+    },
+
+    lscVideoContainer: {
+        width: '100%',
+        height: 400,
+        alignItems: 'center',
+        position: 'relative',
+        borderWidth: 4,
+        borderColor: '#350066'
     },
 
     lscVideo: {
         width: '100%',
-        height: 500, 
-        borderWidth: 4,
-        borderRadius:30,
-        borderColor: '#350066'
+        height: 392, 
     },
 
     button: {
         position: 'absolute',
+        alignContent: 'center',
         bottom: 15,
         right: 15,
-        backgroundColor: '#ffffff', // Fondo semitransparente
+        backgroundColor: '#ffffff',
         paddingVertical: 8,
         paddingHorizontal: 12,
         width: 50,
@@ -172,6 +168,14 @@ const styles = StyleSheet.create({
         borderRadius:25,
         borderColor: '#350066'
       },
+
+    icon: {
+        position: 'relative',
+        margin: 0,
+        padding:0,
+        width: 20,
+        height: 20,
+    },
       
     subtitle: {
         color: '#350066',
@@ -181,7 +185,7 @@ const styles = StyleSheet.create({
     },
     textarea: {
         width: '100%',
-        height: 150, // Ajusta la altura según lo que necesites
+        height: 130,
         borderColor: '#350066',
         borderWidth: 4,
         borderRadius: 20,
@@ -192,22 +196,27 @@ const styles = StyleSheet.create({
         backgroundColor: '#f9f9f9',
       },
 
-    buttonsContainer: {
+      buttonsContainer: {
+        position: 'absolute',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
         alignItems: 'center',
-        margin: 20
+        justifyContent: 'space-evenly', 
+        bottom: 10
     },
+    sideButtons: {
+        width: 45,
+        height: 45,
+        borderRadius: 10,
+        borderWidth: 4,
+        borderColor: '#350066',
+        backgroundColor: '#d7e6fa'
+    },
+
     centerButton: {
         width: 70,
         height: 70,
-        borderRadius: 5,
-        borderWidth: 4,
-        borderRadius:35,
-        borderColor: '#350066',
-        backgroundColor: '#8d77ed'
-    },
-    otherButton: {
-        width: 50,
-        height: 50,
         borderRadius: 5,
         borderWidth: 4,
         borderRadius:35,
