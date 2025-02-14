@@ -1,12 +1,66 @@
 import React, { useState, useEffect } from "react";
-import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, Keyboard, ScrollView} from "react-native";
+import { TextInput, StyleSheet, View, Text, TouchableOpacity, Keyboard, ScrollView, NativeModules, NativeEventEmitter, Platform} from "react-native";
+import { useSharedValue } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
 import { Icon } from '@rneui/themed';
-import { Camera, useCameraDevice, useCameraPermission} from "react-native-vision-camera";
+import { 
+    Camera, 
+    useCameraDevice, 
+    useCameraPermission,
+    useSkiaFrameProcessor,
+    VisionCameraProxy,
+} from "react-native-vision-camera";
+import {Skia, PaintStyle} from '@shopify/react-native-skia';
 
-const lscVideo = require('../assets/images/imageTest.png')
+// const { HandLandmarks } = NativeModules;
+const handLandmarksEmitter = new NativeEventEmitter();
+
+// Initialize the frame processor plugin 'handLandmarks'
+const handLandMarkPlugin = VisionCameraProxy.initFrameProcessorPlugin('handLandmarks',{});
+
+const lines = [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 4],
+    [0, 5],
+    [5, 6],
+    [6, 7],
+    [7, 8],
+    [5, 9],
+    [9, 10],
+    [10, 11],
+    [11, 12],
+    [9, 13],
+    [13, 14],
+    [14, 15],
+    [15, 16],
+    [13, 17],
+    [17, 18],
+    [18, 19],
+    [19, 20],
+    [0, 17],
+  ];
+
+// Create a worklet function 'handLandmarks' that will call the plugin function
+function handLandmarks(frame) {
+    'worklet';
+    if (handLandMarkPlugin == null) {
+        throw new Error('Failed to load Frame Processor Plugin!');
+    }
+    return handLandMarkPlugin.call(frame);
+}
 
 const TranslatorLSCEsp = () => {
+
+    const paint = Skia.Paint();
+    paint.setStyle(PaintStyle.Fill);
+    paint.setColor(Skia.Color('blue'));
+
+    const linePaint = Skia.Paint();
+    linePaint.setStyle(PaintStyle.Fill);
+    linePaint.setStrokeWidth(4);
+    linePaint.setColor(Skia.Color('lime'));
 
     const navigation = useNavigation();
     const [text, setText] = useState('');
@@ -15,6 +69,37 @@ const TranslatorLSCEsp = () => {
 
     const device = useCameraDevice('back');
     const { hasPermission, setHasPermission} = useCameraPermission(false);
+
+    const landmarks = useSharedValue({});
+
+    useEffect(() => {
+        // Set up the event listener to listen for hand landmarks detection results
+        const subscription = handLandmarksEmitter.addListener(
+          'onHandLandmarksDetected',
+          event => {
+            // Update the landmarks shared value to paint them on the screen
+            landmarks.value = event.landmarks;
+    
+            /*
+              The event contains values for landmarks and hand.
+              These values are defined in the HandLandmarkerResultProcessor class
+              found in the HandLandmarks.swift file.
+            */
+            console.log("onHandLandmarksDetected: ", event);
+    
+            /*
+              This is where you can handle converting the data into commands
+              for further processing.
+            */
+          },
+        );
+    
+        // Clean up the event listener when the component is unmounted
+        return () => {
+          subscription.remove();
+        };
+      }, []);
+    
 
     useEffect(() => {
         const showSubscription = Keyboard.addListener("keyboardDidShow", () => setIsKeyboardOpen(true));
@@ -46,6 +131,50 @@ const TranslatorLSCEsp = () => {
             opacity: baseOpacity < 1 ? baseOpacity : 1
         }
     }
+
+    const frameProcessor = useSkiaFrameProcessor(frame => {
+        'worklet';
+    
+        // Process the frame using the 'handLandmarks' function
+        const data = handLandmarks(frame);
+        frame.render();
+    
+        /* 
+          Paint landmarks on the screen.
+          Note: This paints landmarks from the previous frame since
+          frame processing is not synchronous.
+        */
+        if (landmarks.value[0]) {
+            const hand = landmarks.value[0];
+            const frameWidth = frame.width;
+            const frameHeight = frame.height;
+        
+            // Draw lines connecting landmarks
+            for (const [from, to] of lines) {
+                frame.drawLine(
+                hand[from].x * Number(frameWidth),
+                hand[from].y * Number(frameHeight),
+                hand[to].x * Number(frameWidth),
+                hand[to].y * Number(frameHeight),
+                linePaint,
+                );
+            }
+        
+            // Draw circles on landmarks
+            for (const mark of hand) {
+                frame.drawCircle(
+                mark.x * Number(frameWidth),
+                mark.y * Number(frameHeight),
+                6,
+                paint,
+                );
+            }
+        }
+    }, []);
+    
+
+    const pixelFormat = Platform.OS === 'ios' ? 'rgb' : 'yuv';
+
     return (
         <View style={styles.container}>
             {!isKeyboardOpen && (
@@ -64,6 +193,8 @@ const TranslatorLSCEsp = () => {
                             style={styles.lscVideo}
                             device={device}
                             isActive={true}
+                            frameProcessor={frameProcessor}
+                            pixelFormat={pixelFormat}
                             />
                         )}
                     </View>
@@ -120,7 +251,7 @@ const styles = StyleSheet.create({
     container:  {
         flex: 1,
         paddingTop: 0,
-        padding: 30,
+        padding: 25,
         backgroundColor: '#d7e6fa',
         alignItems: 'center',
         justifyContent: 'center'
@@ -136,7 +267,8 @@ const styles = StyleSheet.create({
     interpretationContainer: {
         width: '100%',
         alignItems: 'center',
-        padingTop: 5,
+        padingTop: 2,
+        height: '35%',
     },
 
     lscVideoContainer: {
@@ -156,7 +288,7 @@ const styles = StyleSheet.create({
     button: {
         position: 'absolute',
         alignContent: 'center',
-        bottom: 15,
+        bottom: 60,
         right: 15,
         backgroundColor: '#ffffff',
         paddingVertical: 8,
