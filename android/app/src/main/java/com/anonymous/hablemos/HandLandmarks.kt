@@ -20,8 +20,27 @@ import com.anonymous.hablemos.HandLandmarkerHolder
 
 class HandLandmarks(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
+    private var reactContext: ReactApplicationContext? = null
+
+    init {
+        this.reactContext = reactContext
+    }
+
     override fun getName(): String {
         return "HandLandmarks" // The name used to access the module from JavaScript
+    }
+
+    // Necesario para NativeEventEmitter
+    @ReactMethod
+    fun addListener(eventName: String) {
+        // No necesitas implementar nada aquí, pero React Native lo requiere.
+        Log.d("HandLandmarks", "addListener llamado para $eventName")
+    }
+
+    @ReactMethod
+    fun removeListeners(count: Int) {
+        // Tampoco necesitas implementar nada aquí, pero React Native lo requiere.
+        Log.d("HandLandmarks", "removeListeners llamado, count: $count")
     }
 
     private fun sendEvent(eventName: String, params: WritableMap?) {
@@ -95,6 +114,7 @@ class HandLandmarks(reactContext: ReactApplicationContext) : ReactContextBaseJav
             // Send success event to JS
             val successParams = Arguments.createMap()
             successParams.putString("status", "Model initialized successfully")
+            Log.d("HandLandmarksFrameProcessor", "Emitiendo evento de inicialización")
             sendEvent("onHandLandmarksStatus", successParams)
 
         } catch (e: Exception) {

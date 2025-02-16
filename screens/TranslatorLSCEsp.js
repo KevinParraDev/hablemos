@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { TextInput, StyleSheet, View, Text, TouchableOpacity, Keyboard, ScrollView, NativeModules, NativeEventEmitter, Platform} from "react-native";
-import { useSharedValue } from "react-native-reanimated";
+import { useSharedValue } from "react-native-worklets-core";
 import { useNavigation } from "@react-navigation/native";
 import { Icon } from '@rneui/themed';
 import { 
@@ -10,13 +10,15 @@ import {
     useSkiaFrameProcessor,
     VisionCameraProxy,
 } from "react-native-vision-camera";
+
 import {Skia, PaintStyle} from '@shopify/react-native-skia';
 
-// const { HandLandmarks } = NativeModules;
-const handLandmarksEmitter = new NativeEventEmitter();
+const { HandLandmarks } = NativeModules;
+const handLandmarksEmitter = new NativeEventEmitter(HandLandmarks);
 
 // Initialize the frame processor plugin 'handLandmarks'
 const handLandMarkPlugin = VisionCameraProxy.initFrameProcessorPlugin('handLandmarks',{});
+console.log("Plugin handLandmarks inicializado: ", handLandMarkPlugin);
 
 const lines = [
     [0, 1],
@@ -62,6 +64,9 @@ const TranslatorLSCEsp = () => {
     linePaint.setStrokeWidth(4);
     linePaint.setColor(Skia.Color('lime'));
 
+    const landmarks = useSharedValue({});
+    
+
     const navigation = useNavigation();
     const [text, setText] = useState('');
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
@@ -70,27 +75,16 @@ const TranslatorLSCEsp = () => {
     const device = useCameraDevice('back');
     const { hasPermission, setHasPermission} = useCameraPermission(false);
 
-    const landmarks = useSharedValue({});
 
     useEffect(() => {
+        HandLandmarks.initModel();
+
         // Set up the event listener to listen for hand landmarks detection results
         const subscription = handLandmarksEmitter.addListener(
           'onHandLandmarksDetected',
-          event => {
+          (event) => {
             // Update the landmarks shared value to paint them on the screen
-            landmarks.value = event.landmarks;
-    
-            /*
-              The event contains values for landmarks and hand.
-              These values are defined in the HandLandmarkerResultProcessor class
-              found in the HandLandmarks.swift file.
-            */
-            console.log("onHandLandmarksDetected: ", event);
-    
-            /*
-              This is where you can handle converting the data into commands
-              for further processing.
-            */
+            landmarks.value = JSON.parse(JSON.stringify(event.landmarks));
           },
         );
     
@@ -132,43 +126,64 @@ const TranslatorLSCEsp = () => {
         }
     }
 
+    // Este sí funciona, o sea que hay un error en el plugin de handLandmarks
+    const frameProcessorPrueba = useSkiaFrameProcessor(frame => {
+        'worklet';
+        
+        // Renderiza el frame
+        frame.render();
+
+        // Intenta dibujar un círculo fijo para probar si Skia está funcionando
+        frame.drawCircle(
+            frame.width / 2,  // Centro de la pantalla en X
+            frame.height / 2, // Centro de la pantalla en Y
+            50,               // Radio del círculo
+            paint             // Usando el Paint que ya definiste
+        );  
+    }, []);
+
     const frameProcessor = useSkiaFrameProcessor(frame => {
         'worklet';
-    
-        // Process the frame using the 'handLandmarks' function
-        const data = handLandmarks(frame);
         frame.render();
+
+        // Process the frame using the 'handLandmarks' function
+        handLandmarks(frame);
     
         /* 
           Paint landmarks on the screen.
           Note: This paints landmarks from the previous frame since
           frame processing is not synchronous.
         */
-        if (landmarks.value[0]) {
-            const hand = landmarks.value[0];
-            const frameWidth = frame.width;
-            const frameHeight = frame.height;
+
+        if (landmarks.value && landmarks.value.length > 0 && Array.isArray(landmarks.value[0])) {
+            const hands = landmarks.value; // Array de manos detectadas
+            
+            // Recorre cada mano
+            hands.forEach(hand => {
+                const frameWidth = frame.width;
+                const frameHeight = frame.height;
+                
+                // Dibuja las líneas de conexión
+                for (const [from, to] of lines) {
+                    frame.drawLine(
+                        hand[from].x * Number(frameWidth),
+                        hand[from].y * Number(frameHeight),
+                        hand[to].x * Number(frameWidth),
+                        hand[to].y * Number(frameHeight),
+                        linePaint
+                    );
+                }
         
-            // Draw lines connecting landmarks
-            for (const [from, to] of lines) {
-                frame.drawLine(
-                hand[from].x * Number(frameWidth),
-                hand[from].y * Number(frameHeight),
-                hand[to].x * Number(frameWidth),
-                hand[to].y * Number(frameHeight),
-                linePaint,
-                );
-            }
-        
-            // Draw circles on landmarks
-            for (const mark of hand) {
-                frame.drawCircle(
-                mark.x * Number(frameWidth),
-                mark.y * Number(frameHeight),
-                6,
-                paint,
-                );
-            }
+                // Dibuja los puntos
+                hand.forEach(mark => {
+                    frame.drawCircle(
+                        mark.x * Number(frameWidth),
+                        mark.y * Number(frameHeight),
+                        6,
+                        paint
+                    );
+                });
+            });
         }
     }, []);
     

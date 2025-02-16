@@ -9,12 +9,18 @@ import android.util.Log
 import com.anonymous.hablemos.HandLandmarkerHolder
 
 class HandLandmarksFrameProcessorPlugin(proxy: VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
+  init {
+        Log.d("HandLandmarksPlugin", "Frame Processor Plugin llamado con opciones: $options")
+  }
   override fun callback(frame: Frame, arguments: Map<String, Any>?): Any {
+    Log.d("HandLandmarksFramePlugin", "callback() llamado con frame")
     if (HandLandmarkerHolder.handLandmarker == null) {
+      Log.d("HandLandmarksPlugin", "handlandmaker es null")
       return "HandLandmarker is not initialized" // Return early if initialization failed
     }
 
      try {
+      Log.d("HandLandmarksPlugin", "Procesando frame desde plugin")
       // Convert the frame to an MPImage
       val mpImage: MPImage = BitmapImageBuilder(frame.imageProxy.toBitmap()).build()
 
