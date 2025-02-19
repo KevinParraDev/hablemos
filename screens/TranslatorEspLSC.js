@@ -3,6 +3,11 @@ import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, KeyboardAvo
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants"
 import { Icon } from '@rneui/themed';
+import {
+    ExpoSpeechRecognitionModule,
+    useSpeechRecognitionEvent,
+  } from "expo-speech-recognition";
+
 
 const lscVideo = require('../assets/images/imageTest.png')
 
@@ -10,8 +15,37 @@ const TranslatorEspLSC = () => {
 
     const navigation = useNavigation();
     const [text, setText] = useState('');
+    const [recognizing, setRecognizing] = useState(false);
+    const [transcript, setTranscript] = useState("");
 
-    const showAlert = () => {
+    useSpeechRecognitionEvent("start", () => setRecognizing(true));
+    useSpeechRecognitionEvent("end", () => setRecognizing(false));
+    useSpeechRecognitionEvent("result", (event) => {
+      setTranscript(event.results[0]?.transcript);
+    });
+    useSpeechRecognitionEvent("error", (event) => {
+      console.log("error code:", event.error, "error message:", event.message);
+    });
+
+    const handleStart = async () => {
+        const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+        if (!result.granted) {
+          console.warn("Permissions not granted", result);
+          return;
+        }
+        // Start speech recognition
+        ExpoSpeechRecognitionModule.start({
+          lang: "es-CO",
+          interimResults: true, //Escritura al tiempo o despues de hablar
+          maxAlternatives: 1,
+          continuous: false, // Control para que se detenga automaticamente el reconocimiento, true:para detenerlo automaticamente
+          requiresOnDeviceRecognition: false, //Reconocimiento usando servicios en la nube, true:reconocimiento local, con el dispositivo
+          addsPunctuation: true,
+        //   contextualStrings: ["Carlsen", "Nepomniachtchi", "Praggnanandhaa"], //palabras claves a priorizar o reconocer
+        });
+      };
+
+      const showAlert = () => {
         if (text.trim() === "") {
             Alert.alert("Aviso", "Por favor, ingresa un texto antes de continuar.");
         } else {
@@ -45,7 +79,7 @@ const TranslatorEspLSC = () => {
                 <Text style={styles.subtitle}>Texto - Audio</Text>
                 <TextInput
                     style={styles.textarea}
-                    value={text}
+                    value={text || transcript}
                     onChangeText={setText}
                     placeholder="Escribe aquí..."
                     placeholderTextColor="#350066"
@@ -53,13 +87,25 @@ const TranslatorEspLSC = () => {
                     numberOfLines={4} // Define una altura inicial (opcional)
                     textAlignVertical="top" // Alinea el texto en la parte superior
                 />
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={!recognizing ? handleStart : () => ExpoSpeechRecognitionModule.stop()}>
+                {!recognizing ? (
                     <Icon 
                         style={styles.icon}
                         name= 'microphone'
                         type='foundation'
                         color= '#350066'
+                    />  
+                   
+                    ) : ( 
+                    <Icon
+
+                        style={styles.icon}
+                        name= 'microphone-slash'
+                        type='font-awesome'
+                        color= '#350066'
                     />
+                   
+                    )}
                 </TouchableOpacity>
             </View>
 
