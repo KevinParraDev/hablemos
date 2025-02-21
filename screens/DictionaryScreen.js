@@ -1,5 +1,5 @@
 import React, {useEffect, useLayoutEffect} from "react";
-import { StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, Modal} from "react-native";
+import { StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, Modal, TouchableWithoutFeedback} from "react-native";
 import { Icon } from '@rneui/themed';
 import {AnimatedVideoCard}  from './elements/CardVideo.js';
 import { useNavigation } from "@react-navigation/native";
@@ -177,45 +177,49 @@ const Dictionary = () => {
                 </TouchableOpacity>
             </View>
             <Modal visible={modalVisible} animationType="slide" transparent={true}>
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        {selectedCard && (
-                            <>
-                                <Image source={selectedCard.source} style={styles.modalImage} />
-                                <Text style={styles.modalText}>{selectedCard.word}</Text>
-                            </>
-                        )}
+                <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+                    <View style={styles.modalContainer}>
+                        <TouchableWithoutFeedback>
+                        <View style={styles.modalContent} >
+                            {selectedCard && (
+                                <>
+                                    <Image source={selectedCard.source} style={styles.modalImage} />
+                                    <Text style={styles.modalText}>{selectedCard.word}</Text>
+                                </>
+                            )}
 
-                        <View style={styles.buttonsMContainer}>
-                            <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
-                                <Icon 
-                                    name= 'arrow-left'
-                                    type='font-awesome'
-                                    color= '#350066'
-                                    containerStyle={styles.modalIcon}
-                                />
-                            </TouchableOpacity>
+                            <View style={styles.buttonsMContainer}>
+                                <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
+                                    <Icon 
+                                        name= 'arrow-left'
+                                        type='font-awesome'
+                                        color= '#350066'
+                                        containerStyle={styles.modalIcon}
+                                    />
+                                </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.favoriteButton} onPress={handleAddToFavorites}>
-                                <Icon 
-                                    name= 'star'
-                                    type='font-awesome'
-                                    color= '#350066'
-                                    containerStyle={styles.favoriteIcon}
-                                />
-                            </TouchableOpacity>
+                                <TouchableOpacity style={styles.favoriteButton} onPress={handleAddToFavorites}>
+                                    <Icon 
+                                        name= 'star'
+                                        type='font-awesome'
+                                        color= '#350066'
+                                        containerStyle={styles.favoriteIcon}
+                                    />
+                                </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.modalButton}>
-                                <Icon 
-                                    name= 'share-alt'
-                                    type='font-awesome'
-                                    color= '#350066'
-                                    containerStyle={styles.modalIcon}
-                                />
-                            </TouchableOpacity>
+                                <TouchableOpacity style={styles.modalButton}>
+                                    <Icon 
+                                        name= 'share-alt'
+                                        type='font-awesome'
+                                        color= '#350066'
+                                        containerStyle={styles.modalIcon}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </View>
+                        </TouchableWithoutFeedback>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
         </View>
     );
@@ -286,7 +290,7 @@ const styles = StyleSheet.create({
     },
     modalContent: {
         width: '80%',
-        height: '53%',
+        height: '60%',
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 20,
@@ -296,7 +300,7 @@ const styles = StyleSheet.create({
     },
     modalImage: {
         width: 250,
-        height: 290,
+        height: 320,
         borderRadius: 20,
         borderColor: '#350066',
         borderWidth: 3,

@@ -96,7 +96,7 @@ const TranslatorEspLSC = () => {
                         color= '#350066'
                     />  
                    
-                    ) : ( 
+                ) : ( 
                     <Icon
 
                         style={styles.icon}
