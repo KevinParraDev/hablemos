@@ -12,6 +12,7 @@ import {
 } from "react-native-vision-camera";
 
 import {Skia, PaintStyle} from '@shopify/react-native-skia';
+import { runOnJS } from "react-native-reanimated";
 
 const { HandLandmarks } = NativeModules;
 const handLandmarksEmitter = new NativeEventEmitter(HandLandmarks);
@@ -53,6 +54,22 @@ function handLandmarks(frame) {
     return handLandMarkPlugin.call(frame);
 }
 
+function transformLandmarks(landmarks){
+    'worklet';
+    // if (!landmarks || landmarks.length === 0) {
+    //   return [];
+    // }
+
+    const firstHand = landmarks[0];
+
+    // if (!firstHand){
+    //     return [];
+    // }
+
+    const formattedLandmarks = Object.values(firstHand).map(point => [point.x, point.y]);
+    return JSON.stringify({"landmarks": formattedLandmarks});
+};
+
 const TranslatorLSCEsp = () => {
 
     const paint = Skia.Paint();
@@ -65,7 +82,6 @@ const TranslatorLSCEsp = () => {
     linePaint.setColor(Skia.Color('lime'));
 
     const landmarks = useSharedValue({});
-    
 
     const navigation = useNavigation();
     const [text, setText] = useState('');
@@ -74,7 +90,6 @@ const TranslatorLSCEsp = () => {
 
     const device = useCameraDevice('back');
     const { hasPermission, setHasPermission} = useCameraPermission(false);
-
 
     useEffect(() => {
         HandLandmarks.initModel();
@@ -103,19 +118,38 @@ const TranslatorLSCEsp = () => {
             setHasPermission(permission === 'granted');
         });
 
-        const interval = setInterval(() => {
-            let signs = ['Hola', 'Amigo', '¿Cómo estás?', 'Bien']
-            let randomWord = signs[Math.floor(Math.random() * signs.length)];
-            setWords(prevWords => {
-                const newWords = [...prevWords, randomWord];
-                return newWords.slice(-3).reverse();
-            })}, 3000);
-
         return () => {
             showSubscription.remove();
             hideSubscription.remove();
             clearInterval(interval);
         };
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval(async() => {
+            if (landmarks.value && Object.keys(landmarks.value).length > 0){
+                try{
+                    const response = await fetch("https://api-hablemos.onrender.com/api/predict/", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: transformLandmarks(landmarks.value),
+                    });
+
+                    const data = await response.json();
+                    console.log('Respuesta de la API:', data);
+
+                    if (data.prediccion !== ""){
+                        setWords(prevWords => {
+                            const newWords = [...prevWords, data.prediction];
+                            return newWords.slice(-3).reverse();
+                        });
+                    }
+                } catch (error){
+                    console.error("Error en la API:", error);
+                }
+            }
+        }, 3000);
+        return () => clearInterval(interval);
     }, []);
 
     const getBubbleStyle = (index) => {
@@ -125,22 +159,6 @@ const TranslatorLSCEsp = () => {
             opacity: baseOpacity < 1 ? baseOpacity : 1
         }
     }
-
-    // Este sí funciona, o sea que hay un error en el plugin de handLandmarks
-    const frameProcessorPrueba = useSkiaFrameProcessor(frame => {
-        'worklet';
-        
-        // Renderiza el frame
-        frame.render();
-
-        // Intenta dibujar un círculo fijo para probar si Skia está funcionando
-        frame.drawCircle(
-            frame.width / 2,  // Centro de la pantalla en X
-            frame.height / 2, // Centro de la pantalla en Y
-            50,               // Radio del círculo
-            paint             // Usando el Paint que ya definiste
-        );  
-    }, []);
 
     const frameProcessor = useSkiaFrameProcessor(frame => {
         'worklet';
@@ -184,6 +202,10 @@ const TranslatorLSCEsp = () => {
                     );
                 });
             });
+
+            // De pronto aquí está el error?
+            const transformedData = transformLandmarks(landmarks.value);
+            landmarks.value = transformedData;
         }
     }, []);
     
