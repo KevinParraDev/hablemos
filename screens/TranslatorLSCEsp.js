@@ -3,6 +3,7 @@ import { TextInput, StyleSheet, View, Text, TouchableOpacity, Keyboard, ScrollVi
 import { useSharedValue } from "react-native-worklets-core";
 import { useNavigation } from "@react-navigation/native";
 import { Icon } from '@rneui/themed';
+
 import { 
     Camera, 
     useCameraDevice, 
@@ -12,7 +13,9 @@ import {
 } from "react-native-vision-camera";
 import * as Speech from 'expo-speech';
 
+
 import {Skia, PaintStyle} from '@shopify/react-native-skia';
+// import { runOnJS } from "react-native-reanimated";
 
 const { HandLandmarks } = NativeModules;
 const handLandmarksEmitter = new NativeEventEmitter(HandLandmarks);
@@ -44,7 +47,8 @@ const lines = [
     [18, 19],
     [19, 20],
     [0, 17],
-  ];
+];
+
 
 // Create a worklet function 'handLandmarks' that will call the plugin function
 function handLandmarks(frame) {
@@ -54,6 +58,22 @@ function handLandmarks(frame) {
     }
     return handLandMarkPlugin.call(frame);
 }
+
+function transformLandmarks(landmarks){
+    'worklet';
+    // if (!landmarks || landmarks.length === 0) {
+    //   return [];
+    // }
+
+    const firstHand = landmarks[0];
+
+    // if (!firstHand){
+    //     return [];
+    // }
+
+    const formattedLandmarks = Object.values(firstHand).map(point => [ Math.trunc(point.y * 640), Math.trunc(point.x * 480)]);
+    return JSON.stringify({"landmarks": formattedLandmarks});
+};
 
 const TranslatorLSCEsp = () => {
 
@@ -86,7 +106,6 @@ const TranslatorLSCEsp = () => {
     linePaint.setColor(Skia.Color('lime'));
 
     const landmarks = useSharedValue({});
-    
 
     const navigation = useNavigation();
     const [text, setText] = useState('');
@@ -96,24 +115,23 @@ const TranslatorLSCEsp = () => {
     const device = useCameraDevice('back');
     const { hasPermission, setHasPermission} = useCameraPermission(false);
 
-
     useEffect(() => {
         HandLandmarks.initModel();
 
         // Set up the event listener to listen for hand landmarks detection results
         const subscription = handLandmarksEmitter.addListener(
-          'onHandLandmarksDetected',
-          (event) => {
+            'onHandLandmarksDetected',
+            (event) => {
             // Update the landmarks shared value to paint them on the screen
             landmarks.value = JSON.parse(JSON.stringify(event.landmarks));
-          },
+            },
         );
     
         // Clean up the event listener when the component is unmounted
         return () => {
-          subscription.remove();
+            subscription.remove();
         };
-      }, []);
+    }, []);
     
 
     useEffect(() => {
@@ -124,19 +142,40 @@ const TranslatorLSCEsp = () => {
             setHasPermission(permission === 'granted');
         });
 
-        const interval = setInterval(() => {
-            let signs = ['Hola', 'Amigo', '¿Cómo estás?', 'Bien']
-            let randomWord = signs[Math.floor(Math.random() * signs.length)];
-            setWords(prevWords => {
-                const newWords = [...prevWords, randomWord];
-                return newWords.slice(-3).reverse();
-            })}, 3000);
-
         return () => {
             showSubscription.remove();
             hideSubscription.remove();
-            clearInterval(interval);
         };
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval( async () => {
+            if (landmarks.value && Object.keys(landmarks.value).length > 0){
+
+                const payload = transformLandmarks(landmarks.value);
+                console.log("📤 Enviando a la API:", payload); // Revisa qué estás enviando
+                try{
+                    const response = await fetch("https://api-hablemos.onrender.com/api/predict/", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: transformLandmarks(landmarks.value),
+                    });
+
+                    const data = await response.json();
+                    console.log('Respuesta de la API:', data);
+
+                    if (data.prediction !== ""){
+                        setWords(prevWords => {
+                            const newWords = [...prevWords, data.prediction];
+                            return newWords.slice(-3).reverse();
+                        });
+                    }
+                } catch (error){
+                    console.error("Error en la API:", error);
+                }
+            }
+        }, 3000);
+        return () => clearInterval(interval);
     }, []);
 
     const getBubbleStyle = (index) => {
@@ -147,22 +186,6 @@ const TranslatorLSCEsp = () => {
         }
     }
 
-    // Este sí funciona, o sea que hay un error en el plugin de handLandmarks
-    const frameProcessorPrueba = useSkiaFrameProcessor(frame => {
-        'worklet';
-        
-        // Renderiza el frame
-        frame.render();
-
-        // Intenta dibujar un círculo fijo para probar si Skia está funcionando
-        frame.drawCircle(
-            frame.width / 2,  // Centro de la pantalla en X
-            frame.height / 2, // Centro de la pantalla en Y
-            50,               // Radio del círculo
-            paint             // Usando el Paint que ya definiste
-        );  
-    }, []);
-
     const frameProcessor = useSkiaFrameProcessor(frame => {
         'worklet';
         frame.render();
@@ -171,9 +194,9 @@ const TranslatorLSCEsp = () => {
         handLandmarks(frame);
     
         /* 
-          Paint landmarks on the screen.
-          Note: This paints landmarks from the previous frame since
-          frame processing is not synchronous.
+            Paint landmarks on the screen.
+            Note: This paints landmarks from the previous frame since
+            frame processing is not synchronous.
         */
 
         if (landmarks.value && landmarks.value.length > 0 && Array.isArray(landmarks.value[0])) {
@@ -345,7 +368,7 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         borderRadius:25,
         borderColor: '#350066'
-      },
+    },
 
     icon: {
         position: 'relative',
@@ -354,13 +377,14 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20,
     },
-      
+
     subtitle: {
         color: '#350066',
         fontSize: 20,
         fontWeight: 'bold',
         marginVertical: 20
     },
+
     textarea: {
         width: '100%',
         height: 130,
@@ -372,9 +396,9 @@ const styles = StyleSheet.create({
         color: '#350066',
         fontWeight: '500',
         backgroundColor: '#f9f9f9',
-      },
+    },
 
-      buttonsContainer: {
+    buttonsContainer: {
         position: 'absolute',
         width: '100%',
         display: 'flex',
@@ -383,6 +407,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-evenly', 
         bottom: 10
     },
+
     sideButtons: {
         width: 45,
         height: 45,

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, KeyboardAvoidingView, ScrollView, Platform, Alert} from "react-native";
+import { TextInput, StyleSheet, View, Text, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
+import { Image } from "expo-image"; // Para soportar los gifs manitos
+import { Icon } from "@rneui/themed";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants"
 import { Icon } from '@rneui/themed';
@@ -9,11 +11,21 @@ import {
   } from "expo-speech-recognition";
 
 
-const lscVideo = require('../assets/images/imageTest.png')
+
+const defaultImage = require("../assets/images/imageTest.png");
+
+
+const getGifPath = (word) => {
+    try {
+        return require(`../assets/Gif/Hola.gif`);
+    } catch (error) {
+        return null;
+    }
+};
 
 const TranslatorEspLSC = () => {
-
     const navigation = useNavigation();
+
     const [text, setText] = useState('');
     const [recognizing, setRecognizing] = useState(false);
     const [transcript, setTranscript] = useState("");
@@ -45,34 +57,43 @@ const TranslatorEspLSC = () => {
         });
       };
 
-      const showAlert = () => {
+    const [text, setText] = useState("");
+    const [imageSource, setImageSource] = useState(defaultImage);
+
+    const loadGif = () => {
+
         if (text.trim() === "") {
             Alert.alert("Aviso", "Por favor, ingresa un texto antes de continuar.");
+            return;
+        }
+
+        const gifPath = getGifPath(text);
+        if (gifPath) {
+            setImageSource(gifPath); // Cambia la imagen por el GIF
         } else {
-            Alert.alert("Texto ingresado", text);
+            Alert.alert("Error", `No se encontró el GIF para la palabra: ${text}`);
+            setImageSource(defaultImage); // Si el GIF no existe, vuelve a la imagen inicial
         }
     };
 
     return (
         <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-        <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
-            <View style={styles.lscContainer}>
-                <Image 
-                    style={styles.lscVideo}
-                    source={lscVideo}
-                />
-                <TouchableOpacity style={styles.button}>
-                    <Icon
-                        style={styles.icon}
-                        name= 'controller-play'
-                        type='entypo'
-                        color= '#350066'
+              
+         <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">       
+                <View style={styles.lscContainer}>
+                    <Image 
+                        style={styles.lscVideo} 
+                        source={imageSource} 
+                        contentFit="cover"
                     />
-                </TouchableOpacity>
-            </View>
+                    
+                    <TouchableOpacity style={styles.playButton} onPress={loadGif}>
+                        <Icon name="controller-play" type="entypo" color="#fff" size={30} />
+                    </TouchableOpacity>
+                </View>
             
 
             <View style = {styles.textContainer}>
@@ -109,125 +130,144 @@ const TranslatorEspLSC = () => {
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.bottomButtons}>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={styles.otherButton}
-                        onPress={() => navigation.navigate("Home")}
-                    >
-                    </TouchableOpacity>
+                
+                <View style={styles.textContainer}>
+                    <Text style={styles.subtitle}>Texto - Audio</Text>
+                    <View style={styles.inputWrapper}>
+                        <TextInput
+                            style={styles.textarea}
+                            value={text}
+                            onChangeText={setText}
+                            placeholder="Escribe aquí..."
+                            placeholderTextColor="#350066"
+                            multiline={true}
+                            numberOfLines={4}
+                            textAlignVertical="top"
+                        />
+                        <TouchableOpacity style={styles.micButton}>
+                            <Icon name="microphone" type="foundation" color="#fff" size={24} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={styles.centerButton}
-                        onPress={() => showAlert()}
-                    >
-                    </TouchableOpacity>
+
+                
+                <View style={styles.bottomButtons}>
+                    <View style={styles.buttonsContainer}>
+                        <TouchableOpacity
+                            style={styles.otherButton}
+                            onPress={() => navigation.navigate("Home")}
+                        />
+                    </View>
+                    <View style={styles.buttonsContainer}>
+                        <TouchableOpacity
+                            style={styles.centerButton}
+                            onPress={loadGif}
+                        />
+                    </View>
+                    <View style={styles.buttonsContainer}>
+                        <TouchableOpacity
+                            style={styles.otherButton}
+                            onPress={() => navigation.navigate("Dictionary")}
+                        />
+                    </View>
                 </View>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={styles.otherButton}
-                        onPress={() => navigation.navigate("Dictionary")}
-                    >
-                    </TouchableOpacity>
-                </View>
-            </View>
+            
         </ScrollView> 
         </KeyboardAvoidingView>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingVertical: 20,
-        paddingTop: Constants.statusBarHeight,
-        backgroundColor: '#d7e6fa',
+    container: { 
+        flex: 1, 
+        paddingVertical: 20, 
+        paddingTop: Constants.statusBarHeight, 
+        backgroundColor: "#d7e6fa" 
     },
-    scrollView: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        paddingHorizontal: 20,
+    scrollView: { 
+        flexGrow: 1, 
+        justifyContent: "center", 
+        paddingHorizontal: 20 
     },
-    lscContainer: {
-        marginTop: 10,
-        width: '100%',
-        height: 500,
-        alignItems: 'center',
-        position: 'relative'
+    lscContainer: { 
+        width: "100%", 
+        height: 400, 
+        alignItems: "center", 
+        justifyContent: "center", 
+        position: "relative" 
     },
-    lscVideo: {
-        width: '100%',
-        height: 500,
-        borderWidth: 4,
-        borderRadius:30,
-        borderColor: '#350066'
+    lscVideo: { 
+        width: "90%", 
+        height: 350, 
+        borderRadius: 20, 
+        borderWidth: 2, 
+        borderColor: "#350066" 
     },
-    button: {
-        position: 'absolute',
-        bottom: 15,
-        right: 15,
-        backgroundColor: '#ffffff',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        width: 50,
-        height: 50,
-        borderRadius: 5,
-        borderWidth: 3,
-        borderRadius:25,
-        borderColor: '#350066'
-      },
-    subtitle: {
-        color: '#350066',
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginVertical: 20,
-        textAlign: 'center'
+    playButton: { 
+        position: "absolute", 
+        bottom: 20, 
+        left: 20, 
+        backgroundColor: "#350066", 
+        padding: 12, 
+        borderRadius: 30, 
+        justifyContent: "center", 
+        alignItems: "center" 
     },
-    textarea: {
-        width: '100%',
-        height: 150, // Ajusta la altura según lo que necesites
-        borderColor: '#350066',
-        borderWidth: 4,
-        borderRadius: 20,
-        padding: 10,
-        fontSize: 16,
-        color: '#350066',
-        fontWeight: '500',
-        backgroundColor: '#f9f9f9',
+    subtitle: { 
+        fontSize: 20, 
+        fontWeight: "bold", 
+        marginVertical: 20, 
+        textAlign: "center", 
+        color: "#350066" 
     },
-    buttonsContainer: {
-        alignItems: 'center',
-        margin: 20
+    inputWrapper: { 
+        width: "100%", 
+        flexDirection: "row", 
+        alignItems: "center", 
+        borderWidth: 2, 
+        borderRadius: 10, 
+        borderColor: "#350066", 
+        backgroundColor: "#f9f9f9", 
+        paddingHorizontal: 10, 
+        paddingVertical: 5 
     },
-    centerButton: {
-        width: 70,
-        height: 70,
-        borderRadius: 5,
-        borderWidth: 4,
-        borderRadius:35,
-        borderColor: '#350066',
-        backgroundColor: '#8d77ed'
+    textarea: { 
+        flex: 1, 
+        fontSize: 16, 
+        color: "#350066", 
+        paddingVertical: 10 
     },
-    otherButton: {
-        width: 50,
-        height: 50,
-        borderRadius: 5,
-        borderWidth: 4,
-        borderRadius:35,
-        borderColor: '#350066',
-        backgroundColor: '#8d77ed'
+    micButton: { 
+        backgroundColor: "#350066", 
+        borderRadius: 20, 
+        padding: 10, 
+        marginLeft: 10 
     },
-    bottomButtons: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center'
+    bottomButtons: { 
+        flexDirection: "row", 
+        justifyContent: "center", 
+        marginTop: 20 
     },
-
-    textContainer: {
-        width: '100%',
-        alignItems: 'center',
+    buttonsContainer: { 
+        alignItems: "center", 
+        margin: 20 
     },
-})
+    centerButton: { 
+        width: 70, 
+        height: 70, 
+        borderRadius: 35, 
+        borderWidth: 4, 
+        borderColor: "#350066", 
+        backgroundColor: "#8d77ed" 
+    },
+    otherButton: { 
+        width: 50, 
+        height: 50, 
+        borderRadius: 35, 
+        borderWidth: 4, 
+        borderColor: "#350066", 
+        backgroundColor: "#8d77ed" 
+    }
+});
 
 export default TranslatorEspLSC;
