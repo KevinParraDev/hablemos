@@ -3,12 +3,11 @@ import { TextInput, StyleSheet, View, Text, TouchableOpacity, Alert, KeyboardAvo
 import { Image } from "expo-image"; // Para soportar los gifs manitos
 import { Icon } from "@rneui/themed";
 import { useNavigation } from "@react-navigation/native";
-import Constants from "expo-constants"
-import { Icon } from '@rneui/themed';
+import Constants from "expo-constants";
 import {
     ExpoSpeechRecognitionModule,
     useSpeechRecognitionEvent,
-  } from "expo-speech-recognition";
+} from "expo-speech-recognition";
 
 
 
@@ -57,7 +56,6 @@ const TranslatorEspLSC = () => {
         });
       };
 
-    const [text, setText] = useState("");
     const [imageSource, setImageSource] = useState(defaultImage);
 
     const loadGif = () => {
@@ -98,6 +96,7 @@ const TranslatorEspLSC = () => {
 
             <View style = {styles.textContainer}>
                 <Text style={styles.subtitle}>Texto - Audio</Text>
+                <View style={styles.inputWrapper}>
                 <TextInput
                     style={styles.textarea}
                     value={text || transcript}
@@ -108,29 +107,29 @@ const TranslatorEspLSC = () => {
                     numberOfLines={4} // Define una altura inicial (opcional)
                     textAlignVertical="top" // Alinea el texto en la parte superior
                 />
-                <TouchableOpacity style={styles.button} onPress={!recognizing ? handleStart : () => ExpoSpeechRecognitionModule.stop()}>
+                <TouchableOpacity style={styles.micButton} onPress={!recognizing ? handleStart : () => ExpoSpeechRecognitionModule.stop()}>
                 {!recognizing ? (
                     <Icon 
                         style={styles.icon}
                         name= 'microphone'
                         type='foundation'
-                        color= '#350066'
+                        color="#fff"
                     />  
-                   
+                
                 ) : ( 
                     <Icon
-
                         style={styles.icon}
-                        name= 'microphone-slash'
-                        type='font-awesome'
-                        color= '#350066'
+                        name= 'microphone'
+                        type="foundation"
+                        color="#fff"
                     />
-                   
+                
                     )}
                 </TouchableOpacity>
+                </View>
             </View>
 
-                
+{/*                 
                 <View style={styles.textContainer}>
                     <Text style={styles.subtitle}>Texto - Audio</Text>
                     <View style={styles.inputWrapper}>
@@ -148,7 +147,7 @@ const TranslatorEspLSC = () => {
                             <Icon name="microphone" type="foundation" color="#fff" size={24} />
                         </TouchableOpacity>
                     </View>
-                </View>
+                </View> */}
 
                 
                 <View style={styles.bottomButtons}>

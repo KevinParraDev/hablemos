@@ -77,7 +77,7 @@ function transformLandmarks(landmarks){
 
 const TranslatorLSCEsp = () => {
 
-    const thingToSay = "Hola, como estas?"
+    const thingToSay = "Dice Yeison que a dormir"
     const [isplay, setIsplay] = useState(false);
 
     const speak = () => {
