@@ -3,8 +3,11 @@
 # dependencies
 node_modules/
 
-#android
-/android
+# #android
+# /android
+
+#idea
+.idea/
 
 # Expo
 .expo/

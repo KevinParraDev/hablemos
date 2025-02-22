@@ -1,44 +1,160 @@
 import React, { useState, useEffect } from "react";
-import { TextInput, StyleSheet, View, Text, TouchableOpacity, Image, Keyboard, ScrollView} from "react-native";
+import { TextInput, StyleSheet, View, Text, TouchableOpacity, Keyboard, ScrollView, NativeModules, NativeEventEmitter, Platform} from "react-native";
+import { useSharedValue } from "react-native-worklets-core";
 import { useNavigation } from "@react-navigation/native";
-import Constants from "expo-constants"
 import { Icon } from '@rneui/themed';
 
-//import { Camera, useCameraDevice, useCameraPermission } from "react-native-vision-camera";
-// en dependencies en el package.json "react-native-vision-camera": "^4.6.3"
+import { 
+    Camera, 
+    useCameraDevice, 
+    useCameraPermission,
+    useSkiaFrameProcessor,
+    VisionCameraProxy,
+} from "react-native-vision-camera";
 
-const lscVideo = require('../assets/images/imageTest.png')
+
+import {Skia, PaintStyle} from '@shopify/react-native-skia';
+// import { runOnJS } from "react-native-reanimated";
+
+const { HandLandmarks } = NativeModules;
+const handLandmarksEmitter = new NativeEventEmitter(HandLandmarks);
+
+// Initialize the frame processor plugin 'handLandmarks'
+const handLandMarkPlugin = VisionCameraProxy.initFrameProcessorPlugin('handLandmarks',{});
+console.log("Plugin handLandmarks inicializado: ", handLandMarkPlugin);
+
+const lines = [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 4],
+    [0, 5],
+    [5, 6],
+    [6, 7],
+    [7, 8],
+    [5, 9],
+    [9, 10],
+    [10, 11],
+    [11, 12],
+    [9, 13],
+    [13, 14],
+    [14, 15],
+    [15, 16],
+    [13, 17],
+    [17, 18],
+    [18, 19],
+    [19, 20],
+    [0, 17],
+];
+
+
+// Create a worklet function 'handLandmarks' that will call the plugin function
+function handLandmarks(frame) {
+    'worklet';
+    if (handLandMarkPlugin == null) {
+        throw new Error('Failed to load Frame Processor Plugin!');
+    }
+    return handLandMarkPlugin.call(frame);
+}
+
+function transformLandmarks(landmarks){
+    'worklet';
+    // if (!landmarks || landmarks.length === 0) {
+    //   return [];
+    // }
+
+    const firstHand = landmarks[0];
+
+    // if (!firstHand){
+    //     return [];
+    // }
+
+    const formattedLandmarks = Object.values(firstHand).map(point => [ Math.trunc(point.y * 640), Math.trunc(point.x * 480)]);
+    return JSON.stringify({"landmarks": formattedLandmarks});
+};
 
 const TranslatorLSCEsp = () => {
+
+    const paint = Skia.Paint();
+    paint.setStyle(PaintStyle.Fill);
+    paint.setColor(Skia.Color('blue'));
+
+    const linePaint = Skia.Paint();
+    linePaint.setStyle(PaintStyle.Fill);
+    linePaint.setStrokeWidth(4);
+    linePaint.setColor(Skia.Color('lime'));
+
+    const landmarks = useSharedValue({});
 
     const navigation = useNavigation();
     const [text, setText] = useState('');
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const [words, setWords] = useState([]);
 
-    //const device = useCameraDevice('back');
-    //const { hasPermission, setHasPermission} = useCameraPermission(false);
+    const device = useCameraDevice('back');
+    const { hasPermission, setHasPermission} = useCameraPermission(false);
+
+    useEffect(() => {
+        HandLandmarks.initModel();
+
+        // Set up the event listener to listen for hand landmarks detection results
+        const subscription = handLandmarksEmitter.addListener(
+            'onHandLandmarksDetected',
+            (event) => {
+            // Update the landmarks shared value to paint them on the screen
+            landmarks.value = JSON.parse(JSON.stringify(event.landmarks));
+            },
+        );
+    
+        // Clean up the event listener when the component is unmounted
+        return () => {
+            subscription.remove();
+        };
+    }, []);
+    
 
     useEffect(() => {
         const showSubscription = Keyboard.addListener("keyboardDidShow", () => setIsKeyboardOpen(true));
         const hideSubscription = Keyboard.addListener("keyboardDidHide", () => setIsKeyboardOpen(false));
         
-        //Camera.requestCameraPermission().then((permission) => {
-        //    setHasPermission(permission === 'granted');
-        //});
-
-        const interval = setInterval(() => {
-            let signs = ['Hola', 'Amigo', '¿Cómo estás?', 'Bien']
-            let randomWord = signs[Math.floor(Math.random() * signs.length)];
-            setWords(prevWords => {
-                const newWords = [...prevWords, randomWord];
-                return newWords.slice(-4).reverse();
-            })}, 2000);
+        Camera.requestCameraPermission().then((permission) => {
+            setHasPermission(permission === 'granted');
+        });
 
         return () => {
-        showSubscription.remove();
-        hideSubscription.remove();
+            showSubscription.remove();
+            hideSubscription.remove();
         };
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval( async () => {
+            if (landmarks.value && Object.keys(landmarks.value).length > 0){
+
+                const payload = transformLandmarks(landmarks.value);
+                console.log("📤 Enviando a la API:", payload); // Revisa qué estás enviando
+                try{
+                    const response = await fetch("https://api-hablemos.onrender.com/api/predict/", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: transformLandmarks(landmarks.value),
+                    });
+
+                    const data = await response.json();
+                    console.log('Respuesta de la API:', data);
+
+                    if (data.prediction !== ""){
+                        setWords(prevWords => {
+                            const newWords = [...prevWords, data.prediction];
+                            return newWords.slice(-3).reverse();
+                        });
+                    }
+                } catch (error){
+                    console.error("Error en la API:", error);
+                }
+            }
+        }, 3000);
+        return () => clearInterval(interval);
     }, []);
 
     const getBubbleStyle = (index) => {
@@ -49,23 +165,58 @@ const TranslatorLSCEsp = () => {
         }
     }
 
+    const frameProcessor = useSkiaFrameProcessor(frame => {
+        'worklet';
+        frame.render();
+
+        // Process the frame using the 'handLandmarks' function
+        handLandmarks(frame);
+    
+        /* 
+            Paint landmarks on the screen.
+            Note: This paints landmarks from the previous frame since
+            frame processing is not synchronous.
+        */
+
+        if (landmarks.value && landmarks.value.length > 0 && Array.isArray(landmarks.value[0])) {
+            const hands = landmarks.value; // Array de manos detectadas
+            
+            // Recorre cada mano
+            hands.forEach(hand => {
+                const frameWidth = frame.width;
+                const frameHeight = frame.height;
+                
+                // Dibuja las líneas de conexión
+                for (const [from, to] of lines) {
+                    frame.drawLine(
+                        hand[from].x * Number(frameWidth),
+                        hand[from].y * Number(frameHeight),
+                        hand[to].x * Number(frameWidth),
+                        hand[to].y * Number(frameHeight),
+                        linePaint
+                    );
+                }
+        
+                // Dibuja los puntos
+                hand.forEach(mark => {
+                    frame.drawCircle(
+                        mark.x * Number(frameWidth),
+                        mark.y * Number(frameHeight),
+                        6,
+                        paint
+                    );
+                });
+            });
+        }
+    }, []);
+    
+
+    const pixelFormat = Platform.OS === 'ios' ? 'rgb' : 'yuv';
+
     return (
         <View style={styles.container}>
             {!isKeyboardOpen && (
                 <View style={styles.lscContainer}>
-                {/*<View style={styles.lscContainer}>
-                    {/*
-                    {!hasPermission && <Text style={styles.subtitle}>No hay permiso de la cámara</Text>}
-                    {hasPermission && device != null && (
-                        <Camera
-                        style={styles.lscVideo}
-                        device={device}
-                        isActive={true}
-                        />
-                    )}
-                    <TouchableOpacity style={styles.button}>
-                    </TouchableOpacity>
-                </View>*/}
                     <ScrollView horizontal={true} style={styles.scrollView}>
                         {words.map((word, index) => (
                             <View key={index} style={getBubbleStyle(index)}>
@@ -73,11 +224,18 @@ const TranslatorLSCEsp = () => {
                             </View>
                         ))}
                     </ScrollView>
-
-                    <Image 
-                        style={styles.lscVideo}
-                        source={lscVideo}
-                    />
+                    <View style = {styles.lscVideoContainer}>
+                        {!hasPermission && <Text style={styles.subtitle}>No hay permiso de la cámara</Text>}
+                        {hasPermission && device != null && (
+                            <Camera
+                            style={styles.lscVideo}
+                            device={device}
+                            isActive={true}
+                            frameProcessor={frameProcessor}
+                            pixelFormat={pixelFormat}
+                            />
+                        )}
+                    </View>
                 </View>
             )}
 
@@ -103,30 +261,26 @@ const TranslatorLSCEsp = () => {
                     />
                 </TouchableOpacity>
             </View>
+            
+            <View style={styles.buttonsContainer}>
+                <TouchableOpacity
+                    style={styles.sideButtons}
+                    onPress={() => navigation.navigate('Home')}
+                >
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={styles.centerButton}
+                    onPress={() => navigation.navigate('TranslatorEspLSC')}
+                >
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.sideButtons}
+                    onPress={() => navigation.navigate('Dictionary')}
+                >
+                </TouchableOpacity>
+            </View>
+            
         
-            <View style={styles.bottomButtons}>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={styles.otherButton}
-                        onPress={() => navigation.navigate("Home")}
-                    >
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={styles.centerButton}
-                        onPress={() => navigation.navigate("TranslatorEspLSC")}
-                    >
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={styles.otherButton}
-                        onPress={() => navigation.navigate("Dictionary")}
-                    >
-                    </TouchableOpacity>
-                </View>
-        </View>
         </View>
     )
 }
@@ -134,17 +288,16 @@ const TranslatorLSCEsp = () => {
 const styles = StyleSheet.create({
     container:  {
         flex: 1,
-        padding: 20,
-        paddingTop: Constants.statusBarHeight,
+        paddingTop: 0,
+        padding: 25,
         backgroundColor: '#d7e6fa',
         alignItems: 'center',
         justifyContent: 'center'
     },
 
     lscContainer: {
-        marginTop: 10,
         width: '100%',
-        height: 500,
+        height: 400,
         alignItems: 'center',
         position: 'relative'
     },
@@ -152,21 +305,30 @@ const styles = StyleSheet.create({
     interpretationContainer: {
         width: '100%',
         alignItems: 'center',
+        padingTop: 2,
+        height: '35%',
+    },
+
+    lscVideoContainer: {
+        width: '100%',
+        height: 400,
+        alignItems: 'center',
+        position: 'relative',
+        borderWidth: 4,
+        borderColor: '#350066'
     },
 
     lscVideo: {
         width: '100%',
-        height: 500, 
-        borderWidth: 4,
-        borderRadius:30,
-        borderColor: '#350066'
+        height: 392, 
     },
 
     button: {
         position: 'absolute',
-        bottom: 15,
+        alignContent: 'center',
+        bottom: 60,
         right: 15,
-        backgroundColor: '#ffffff', // Fondo semitransparente
+        backgroundColor: '#ffffff',
         paddingVertical: 8,
         paddingHorizontal: 12,
         width: 50,
@@ -175,17 +337,26 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         borderRadius:25,
         borderColor: '#350066'
-      },
-      
+    },
+
+    icon: {
+        position: 'relative',
+        margin: 0,
+        padding:0,
+        width: 20,
+        height: 20,
+    },
+
     subtitle: {
         color: '#350066',
         fontSize: 20,
         fontWeight: 'bold',
         marginVertical: 20
     },
+
     textarea: {
         width: '100%',
-        height: 150, // Ajusta la altura según lo que necesites
+        height: 130,
         borderColor: '#350066',
         borderWidth: 4,
         borderRadius: 20,
@@ -194,24 +365,30 @@ const styles = StyleSheet.create({
         color: '#350066',
         fontWeight: '500',
         backgroundColor: '#f9f9f9',
-      },
+    },
 
     buttonsContainer: {
+        position: 'absolute',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
         alignItems: 'center',
-        margin: 20
+        justifyContent: 'space-evenly', 
+        bottom: 10
     },
+
+    sideButtons: {
+        width: 45,
+        height: 45,
+        borderRadius: 10,
+        borderWidth: 4,
+        borderColor: '#350066',
+        backgroundColor: '#d7e6fa'
+    },
+
     centerButton: {
         width: 70,
         height: 70,
-        borderRadius: 5,
-        borderWidth: 4,
-        borderRadius:35,
-        borderColor: '#350066',
-        backgroundColor: '#8d77ed'
-    },
-    otherButton: {
-        width: 50,
-        height: 50,
         borderRadius: 5,
         borderWidth: 4,
         borderRadius:35,

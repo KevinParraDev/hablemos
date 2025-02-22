@@ -97,7 +97,8 @@ const TranslatorEspLSC = () => {
                         />
                     </View>
                 </View>
-            </ScrollView>
+            
+        </ScrollView> 
         </KeyboardAvoidingView>
     );
 };
