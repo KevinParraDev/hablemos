@@ -3,7 +3,13 @@ import { TextInput, StyleSheet, View, Text, TouchableOpacity, Alert, KeyboardAvo
 import { Image } from "expo-image"; // Para soportar los gifs manitos
 import { Icon } from "@rneui/themed";
 import { useNavigation } from "@react-navigation/native";
-import Constants from "expo-constants";
+import Constants from "expo-constants"
+import { Icon } from '@rneui/themed';
+import {
+    ExpoSpeechRecognitionModule,
+    useSpeechRecognitionEvent,
+  } from "expo-speech-recognition";
+
 
 
 const defaultImage = require("../assets/images/imageTest.png");
@@ -19,10 +25,43 @@ const getGifPath = (word) => {
 
 const TranslatorEspLSC = () => {
     const navigation = useNavigation();
+
+    const [text, setText] = useState('');
+    const [recognizing, setRecognizing] = useState(false);
+    const [transcript, setTranscript] = useState("");
+
+    useSpeechRecognitionEvent("start", () => setRecognizing(true));
+    useSpeechRecognitionEvent("end", () => setRecognizing(false));
+    useSpeechRecognitionEvent("result", (event) => {
+      setTranscript(event.results[0]?.transcript);
+    });
+    useSpeechRecognitionEvent("error", (event) => {
+      console.log("error code:", event.error, "error message:", event.message);
+    });
+
+    const handleStart = async () => {
+        const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+        if (!result.granted) {
+          console.warn("Permissions not granted", result);
+          return;
+        }
+        // Start speech recognition
+        ExpoSpeechRecognitionModule.start({
+          lang: "es-CO",
+          interimResults: true, //Escritura al tiempo o despues de hablar
+          maxAlternatives: 1,
+          continuous: false, // Control para que se detenga automaticamente el reconocimiento, true:para detenerlo automaticamente
+          requiresOnDeviceRecognition: false, //Reconocimiento usando servicios en la nube, true:reconocimiento local, con el dispositivo
+          addsPunctuation: true,
+        //   contextualStrings: ["Carlsen", "Nepomniachtchi", "Praggnanandhaa"], //palabras claves a priorizar o reconocer
+        });
+      };
+
     const [text, setText] = useState("");
     const [imageSource, setImageSource] = useState(defaultImage);
 
     const loadGif = () => {
+
         if (text.trim() === "") {
             Alert.alert("Aviso", "Por favor, ingresa un texto antes de continuar.");
             return;
@@ -42,8 +81,8 @@ const TranslatorEspLSC = () => {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
-                
+              
+         <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">       
                 <View style={styles.lscContainer}>
                     <Image 
                         style={styles.lscVideo} 
@@ -55,6 +94,41 @@ const TranslatorEspLSC = () => {
                         <Icon name="controller-play" type="entypo" color="#fff" size={30} />
                     </TouchableOpacity>
                 </View>
+            
+
+            <View style = {styles.textContainer}>
+                <Text style={styles.subtitle}>Texto - Audio</Text>
+                <TextInput
+                    style={styles.textarea}
+                    value={text || transcript}
+                    onChangeText={setText}
+                    placeholder="Escribe aquí..."
+                    placeholderTextColor="#350066"
+                    multiline={true} // Permite múltiples líneas
+                    numberOfLines={4} // Define una altura inicial (opcional)
+                    textAlignVertical="top" // Alinea el texto en la parte superior
+                />
+                <TouchableOpacity style={styles.button} onPress={!recognizing ? handleStart : () => ExpoSpeechRecognitionModule.stop()}>
+                {!recognizing ? (
+                    <Icon 
+                        style={styles.icon}
+                        name= 'microphone'
+                        type='foundation'
+                        color= '#350066'
+                    />  
+                   
+                ) : ( 
+                    <Icon
+
+                        style={styles.icon}
+                        name= 'microphone-slash'
+                        type='font-awesome'
+                        color= '#350066'
+                    />
+                   
+                    )}
+                </TouchableOpacity>
+            </View>
 
                 
                 <View style={styles.textContainer}>

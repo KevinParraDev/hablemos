@@ -11,6 +11,7 @@ import {
     useSkiaFrameProcessor,
     VisionCameraProxy,
 } from "react-native-vision-camera";
+import * as Speech from 'expo-speech';
 
 
 import {Skia, PaintStyle} from '@shopify/react-native-skia';
@@ -22,6 +23,7 @@ const handLandmarksEmitter = new NativeEventEmitter(HandLandmarks);
 // Initialize the frame processor plugin 'handLandmarks'
 const handLandMarkPlugin = VisionCameraProxy.initFrameProcessorPlugin('handLandmarks',{});
 console.log("Plugin handLandmarks inicializado: ", handLandMarkPlugin);
+
 
 const lines = [
     [0, 1],
@@ -74,6 +76,25 @@ function transformLandmarks(landmarks){
 };
 
 const TranslatorLSCEsp = () => {
+
+    const thingToSay = "Hola, como estas?"
+    const [isplay, setIsplay] = useState(false);
+
+    const speak = () => {
+        if (!isplay) {
+            Speech.speak(thingToSay, {
+                language: 'es-CO',  
+                pitch: 1,      
+                rate: 0.9,
+                onDone: () => setIsplay(false), 
+                onStopped: () => setIsplay(false)
+            });
+            setIsplay(true);
+        }else{
+            Speech.stop();
+            setIsplay(false);
+        }
+      };
 
     const paint = Skia.Paint();
     paint.setStyle(PaintStyle.Fill);
@@ -244,7 +265,8 @@ const TranslatorLSCEsp = () => {
                 <TextInput
                     style={styles.textarea}
                     value={text}
-                    onChangeText={setText}
+                    onChangeText={thingToSay}
+                    editable={false}
                     placeholder="Aquí aparecerá la interpretación de las señas..."
                     placeholderTextColor="#350066"
                     multiline={true} // Permite múltiples líneas
@@ -252,13 +274,22 @@ const TranslatorLSCEsp = () => {
                     textAlignVertical="top" // Alinea el texto en la parte superior
                     
                 />
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={speak}>
+                {!isplay ? (
                     <Icon 
                         style={styles.icon}
                         name= 'volume-2'
                         type='feather'
                         color= '#350066'
                     />
+                ):(
+                    <Icon 
+                        style={styles.icon}
+                        name= 'pause'
+                        type='foundation'
+                        color= '#350066'
+                    /> 
+                )}
                 </TouchableOpacity>
             </View>
             
