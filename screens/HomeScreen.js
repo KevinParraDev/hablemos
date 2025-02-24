@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Image} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import  {db}  from "../src/firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
+import { useCopilot, CopilotStep, walkthroughable } from 'react-native-copilot';
 
+// Definimos los componentes que van a ser resaltados en el tutorial
+const WalkthroughableTouchable = walkthroughable(TouchableOpacity);
 
 const addUser = async () => {
     try {
@@ -22,11 +25,12 @@ const addUser = async () => {
 // Llama a la función para probar
 addUser();
 
-const homeVideo = require('../assets/images/imageTest.png')
+const homeVideo = require('../assets/Gif/Hola.gif')
 
 const HomeScreen = () => {
 
     const navigation = useNavigation();
+    const { start } = useCopilot();
 
     return (
         <View style={styles.container}>
@@ -37,37 +41,45 @@ const HomeScreen = () => {
             <Text style={styles.saludo}>¡Hola!</Text>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate("TranslatorLSCEsp")}
+                    onPress={() => start()}
                     style={StyleSheet.compose(styles.button, {backgroundColor: '#cdf9f6'})}
                 >
                     <Text style={styles.buttonText}>
                         Tutorial
                     </Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("TranslatorLSCEsp")}
-                    style={StyleSheet.compose(styles.button, {backgroundColor: '#e6f9da'})}
-                >
-                    <Text style={styles.buttonText}>
-                        LSC - ESP
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("TranslatorEspLSC")}
-                    style={StyleSheet.compose(styles.button, {backgroundColor: '#d7e6fa'})}
-                >
-                    <Text style={styles.buttonText}>
-                        ESP - LSC
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("Dictionary")}
-                    style={StyleSheet.compose(styles.button, {backgroundColor: '#ffdbde'})}
-                >
-                    <Text style={styles.buttonText}>
-                        Diccionario
-                    </Text>
-                </TouchableOpacity>
+                <CopilotStep name='LSC-ESP' order={1} text='Aquí podrás realizar la traducción de señas a español.'>
+                    <WalkthroughableTouchable 
+                        onPress={() => navigation.navigate("TranslatorLSCEsp")}
+                        style={StyleSheet.compose(styles.button, {backgroundColor: '#e6f9da'})}
+                    >
+                        <Text style={styles.buttonText}>
+                            LSC - ESP
+                        </Text>
+                    </WalkthroughableTouchable>
+                </CopilotStep>
+
+                <CopilotStep name='ESP-LSC' order={2} text='Aquí podrás realizar la traducción de español a señas.'>
+                    <WalkthroughableTouchable
+                        onPress={() => navigation.navigate("TranslatorEspLSC")}
+                        style={StyleSheet.compose(styles.button, {backgroundColor: '#d7e6fa'})}
+                    >
+                        <Text style={styles.buttonText}>
+                            ESP - LSC
+                        </Text>
+                    </WalkthroughableTouchable>
+                </CopilotStep>
+
+                <CopilotStep name='Diccionario' order={3} text='Aquí encontrarás distintas palabras y su seña correspondiente.'>
+                    <WalkthroughableTouchable
+                        onPress={() => navigation.navigate("Dictionary")}
+                        style={StyleSheet.compose(styles.button, {backgroundColor: '#ffdbde'})}
+                    >
+                        <Text style={styles.buttonText}>
+                            Diccionario
+                        </Text>
+                    </WalkthroughableTouchable>
+                </CopilotStep>
             </View>
         </View>
     )
