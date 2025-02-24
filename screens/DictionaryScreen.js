@@ -11,12 +11,14 @@ import { FavoritesContext } from "./context/FavoritesContext";
 
 const cardsExample = [
     {
-        source: require('../assets/images/imageTest.png'),
-        word: 'Palabra'
+        source: require('../assets/images/Hola.jpg'),
+        sourceVideo: require('../assets/Gif/Hola.gif'),
+        word: 'Hola'
     },
     {
-        source: require('../assets/images/imageTest.png'),
-        word: 'Hola'
+        source: require('../assets/images/Gracias.jpg'),
+        sourceVideo: require('../assets/Gif/Gracias.gif'),
+        word: 'Gracias'
     },
     {
         source: require('../assets/images/imageTest.png'),
@@ -49,6 +51,18 @@ const cardsExample = [
     {
         source: require('../assets/images/imageTest.png'),
         word: 'Computador'
+    },
+]
+
+const icons = [
+    {
+        source: require('../assets/Icons/icon_translate_spn_lsc.png')
+    },
+    {
+        source: require('../assets/Icons/icon_home.png')
+    },
+    {
+        source: require('../assets/Icons/icon_translate_lsc_spn.png')
     },
 ]
 
@@ -164,16 +178,19 @@ const Dictionary = () => {
                     style={styles.sideButtons}
                     onPress={() => navigation.navigate('TranslatorLSCEsp')}
                 >
+                    <Image source={icons[0].source} style={styles.image}></Image>
                 </TouchableOpacity>
                 <TouchableOpacity 
                     style={styles.centerButton}
                     onPress={() => navigation.navigate('Home')}
                 >
+                    <Image source={icons[1].source} style={styles.imageCenter}></Image>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.sideButtons}
                     onPress={() => navigation.navigate('TranslatorEspLSC')}
                 >
+                    <Image source={icons[2].source} style={styles.image}></Image>
                 </TouchableOpacity>
             </View>
             <Modal visible={modalVisible} animationType="slide" transparent={true}>
@@ -181,13 +198,18 @@ const Dictionary = () => {
                     <View style={styles.modalContainer}>
                         <TouchableWithoutFeedback>
                         <View style={styles.modalContent} >
-                            {selectedCard && (
+                            {selectedCard && selectedCard.sourceVideo && (
+                                <>
+                                    <Image source={selectedCard.sourceVideo} style={styles.modalImage} />
+                                    <Text style={styles.modalText}>{selectedCard.word}</Text>
+                                </>
+                            )}
+                            {selectedCard && !selectedCard.sourceVideo && (
                                 <>
                                     <Image source={selectedCard.source} style={styles.modalImage} />
                                     <Text style={styles.modalText}>{selectedCard.word}</Text>
                                 </>
                             )}
-
                             <View style={styles.buttonsMContainer}>
                                 <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
                                     <Icon 
@@ -348,7 +370,22 @@ const styles = StyleSheet.create({
         backgroundColor: '#ff809f',
         alignContent: 'center',
         marginTop: 10
-    }
+    },
+    image: {
+        position: 'relative',
+        margin: 0,
+        padding:0,
+        width: 35,
+        height: 35,
+    },
+
+    imageCenter: {
+        position: 'relative',
+        marginLeft: 2,
+        marginTop: 2,
+        width: 55,
+        height: 55,
+    },
 });
 
 export default Dictionary;

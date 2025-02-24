@@ -11,6 +11,18 @@ import {
 
 const defaultImage = require("../assets/images/imageTest.png");
 
+const icons = [
+    {
+        source: require('../assets/Icons/icon_home.png')
+    },
+    {
+        source: require('../assets/Icons/icon_translate_lsc_spn.png')
+    },
+    {
+        source: require('../assets/Icons/icon_dictionary.png')
+    }
+]
+
 const TranslatorEspLSC = () => {
     
     const navigation = useNavigation();
@@ -87,8 +99,8 @@ const TranslatorEspLSC = () => {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-              
-         <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">       
+
+        <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">       
                 <View style={styles.lscContainer}>
                     <Image 
                         style={styles.lscVideo} 
@@ -171,25 +183,25 @@ const TranslatorEspLSC = () => {
                 </View> */}
 
                 
-                <View style={styles.bottomButtons}>
-                    <View style={styles.buttonsContainer}>
-                        <TouchableOpacity
-                            style={styles.otherButton}
-                            onPress={() => navigation.navigate("Home")}
-                        />
-                    </View>
-                    <View style={styles.buttonsContainer}>
-                        <TouchableOpacity
-                            style={styles.centerButton}
-                            onPress={loadGif}
-                        />
-                    </View>
-                    <View style={styles.buttonsContainer}>
-                        <TouchableOpacity
-                            style={styles.otherButton}
-                            onPress={() => navigation.navigate("Dictionary")}
-                        />
-                    </View>
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity
+                        style={styles.sideButtons}
+                        onPress={() => navigation.navigate('Home')}
+                    >s
+                        <Image source={icons[0].source} style={styles.image}></Image>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={styles.centerButton}
+                        onPress={() => navigation.navigate('TranslatorLSCEsp')}
+                    >
+                        <Image source={icons[1].source} style={styles.imageCenter}></Image>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.sideButtons}
+                        onPress={() => navigation.navigate('Dictionary')}
+                    >
+                        <Image source={icons[2].source} style={styles.image}></Image>
+                    </TouchableOpacity>
                 </View>
             
         </ScrollView> 
@@ -201,24 +213,22 @@ const styles = StyleSheet.create({
     container: { 
         flex: 1, 
         paddingVertical: 20, 
-        paddingTop: Constants.statusBarHeight, 
+        paddingTop: Constants.statusBarHeight,
         backgroundColor: "#d7e6fa" 
     },
     scrollView: { 
         flexGrow: 1, 
-        justifyContent: "center", 
-        paddingHorizontal: 20 
+        paddingHorizontal: 20 ,
     },
     lscContainer: { 
         width: "100%", 
         height: 400, 
         alignItems: "center", 
-        justifyContent: "center", 
         position: "relative" 
     },
     lscVideo: { 
         width: "90%", 
-        height: 350, 
+        height: 392, 
         borderRadius: 20, 
         borderWidth: 2, 
         borderColor: "#350066" 
@@ -254,6 +264,7 @@ const styles = StyleSheet.create({
     textarea: { 
         flex: 1, 
         fontSize: 16, 
+        height: 130,
         color: "#350066", 
         paddingVertical: 10 
     },
@@ -261,16 +272,19 @@ const styles = StyleSheet.create({
         backgroundColor: "#350066", 
         borderRadius: 20, 
         padding: 10, 
-        marginLeft: 10 
+        bottom: 10,
+        right: 10,
+        position: 'absolute'
     },
-    bottomButtons: { 
-        flexDirection: "row", 
-        justifyContent: "center", 
-        marginTop: 20 
-    },
-    buttonsContainer: { 
-        alignItems: "center", 
-        margin: 20 
+    buttonsContainer: {
+        position: 'absolute',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly', 
+        bottom: 10,
+        marginLeft: 20
     },
     centerButton: { 
         width: 70, 
@@ -280,14 +294,37 @@ const styles = StyleSheet.create({
         borderColor: "#350066", 
         backgroundColor: "#8d77ed" 
     },
-    otherButton: { 
-        width: 50, 
-        height: 50, 
-        borderRadius: 35, 
-        borderWidth: 4, 
-        borderColor: "#350066", 
-        backgroundColor: "#8d77ed" 
-    }
+    bottomButtons: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center'
+    },
+    sideButtons: {
+        width: 45,
+        height: 45,
+        borderRadius: 10,
+        borderWidth: 4,
+        borderColor: '#350066',
+        backgroundColor: '#d7e6fa',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    image: {
+        position: 'relative',
+        margin: 0,
+        padding:0,
+        width: 35,
+        height: 35,
+    },
+
+    imageCenter: {
+        position: 'relative',
+        marginLeft: 2,
+        marginTop: 2,
+        width: 55,
+        height: 55,
+    },
+    
 });
 
 export default TranslatorEspLSC;

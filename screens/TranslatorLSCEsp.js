@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { TextInput, StyleSheet, View, Text, TouchableOpacity, Keyboard, ScrollView, NativeModules, NativeEventEmitter, Platform} from "react-native";
+import { TextInput, StyleSheet, View, Text, TouchableOpacity, Keyboard, ScrollView, NativeModules, NativeEventEmitter, Platform,  Image} from "react-native";
 import { useSharedValue } from "react-native-worklets-core";
 import { useNavigation } from "@react-navigation/native";
 import { Icon } from '@rneui/themed';
@@ -49,6 +49,17 @@ const lines = [
     [0, 17],
 ];
 
+const icons = [
+    {
+        source: require('../assets/Icons/icon_home.png')
+    },
+    {
+        source: require('../assets/Icons/icon_translate_spn_lsc.png')
+    },
+    {
+        source: require('../assets/Icons/icon_dictionary.png')
+    }
+]
 
 // Create a worklet function 'handLandmarks' that will call the plugin function
 function handLandmarks(frame) {
@@ -298,16 +309,19 @@ const TranslatorLSCEsp = () => {
                     style={styles.sideButtons}
                     onPress={() => navigation.navigate('Home')}
                 >
+                    <Image source={icons[0].source} style={styles.image}></Image>
                 </TouchableOpacity>
                 <TouchableOpacity 
                     style={styles.centerButton}
                     onPress={() => navigation.navigate('TranslatorEspLSC')}
                 >
+                    <Image source={icons[1].source} style={styles.imageCenter}></Image>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.sideButtons}
                     onPress={() => navigation.navigate('Dictionary')}
                 >
+                    <Image source={icons[2].source} style={styles.image}></Image>
                 </TouchableOpacity>
             </View>
             
@@ -357,7 +371,7 @@ const styles = StyleSheet.create({
     button: {
         position: 'absolute',
         alignContent: 'center',
-        bottom: 60,
+        bottom: 95,
         right: 15,
         backgroundColor: '#ffffff',
         paddingVertical: 8,
@@ -376,6 +390,22 @@ const styles = StyleSheet.create({
         padding:0,
         width: 20,
         height: 20,
+    },
+
+    image: {
+        position: 'relative',
+        margin: 0,
+        padding:0,
+        width: 35,
+        height: 35,
+    },
+
+    imageCenter: {
+        position: 'relative',
+        margin: 0,
+        padding:0,
+        width: 55,
+        height: 55,
     },
 
     subtitle: {
@@ -414,7 +444,9 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 4,
         borderColor: '#350066',
-        backgroundColor: '#d7e6fa'
+        backgroundColor: '#d7e6fa',
+        alignItems: 'center',
+        justifyContent: 'center'
     },
 
     centerButton: {
@@ -424,7 +456,9 @@ const styles = StyleSheet.create({
         borderWidth: 4,
         borderRadius:35,
         borderColor: '#350066',
-        backgroundColor: '#8d77ed'
+        backgroundColor: '#8d77ed',
+        alignItems: 'center',
+        justifyContent: 'center'
     },
 
     bottomButtons: {
