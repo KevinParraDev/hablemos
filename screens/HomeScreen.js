@@ -25,7 +25,7 @@ const addUser = async () => {
 // Llama a la función para probar
 addUser();
 
-const homeVideo = require('../assets/images/imageTest.png')
+const homeVideo = require('../assets/Gif/Hola.gif')
 
 const HomeScreen = () => {
 
