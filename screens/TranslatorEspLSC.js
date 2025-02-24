@@ -9,22 +9,11 @@ import {
     useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
 
-
-
 const defaultImage = require("../assets/images/imageTest.png");
 
-
-const getGifPath = (word) => {
-    try {
-        return require(`../assets/Gif/Hola.gif`);
-    } catch (error) {
-        return null;
-    }
-};
-
 const TranslatorEspLSC = () => {
+    
     const navigation = useNavigation();
-
     const [text, setText] = useState('');
     const [recognizing, setRecognizing] = useState(false);
     const [transcript, setTranscript] = useState("");
@@ -32,7 +21,9 @@ const TranslatorEspLSC = () => {
     useSpeechRecognitionEvent("start", () => setRecognizing(true));
     useSpeechRecognitionEvent("end", () => setRecognizing(false));
     useSpeechRecognitionEvent("result", (event) => {
-      setTranscript(event.results[0]?.transcript);
+        const newTranscript = event.results[0]?.transcript;
+        setTranscript(newTranscript);
+        setText(newTranscript);
     });
     useSpeechRecognitionEvent("error", (event) => {
       console.log("error code:", event.error, "error message:", event.message);
@@ -57,21 +48,38 @@ const TranslatorEspLSC = () => {
       };
 
     const [imageSource, setImageSource] = useState(defaultImage);
+    const [isPlaying, setIsPlaying] = useState(false);
 
-    const loadGif = () => {
-
-        if (text.trim() === "") {
-            Alert.alert("Aviso", "Por favor, ingresa un texto antes de continuar.");
-            return;
+    const getGifPath = (word) => {
+        try {
+            if (text.toLowerCase() == "hola"){ 
+                return require('../assets/Gif/Hola.gif');
+            }else if (text.toLowerCase() == "gracias"){
+                return require('../assets/Gif/Gracias.gif');
+            }
+        } catch (error) {
+            return null;
         }
+    };
 
-        const gifPath = getGifPath(text);
-        if (gifPath) {
-            setImageSource(gifPath); // Cambia la imagen por el GIF
+    const loadGif = () => { 
+
+        if (isPlaying) {
+            setImageSource(defaultImage); 
         } else {
-            Alert.alert("Error", `No se encontró el GIF para la palabra: ${text}`);
-            setImageSource(defaultImage); // Si el GIF no existe, vuelve a la imagen inicial
-        }
+            if (text.trim() === "") {
+                Alert.alert("Aviso", "Por favor, ingresa un texto antes de continuar.");
+                return;
+            }
+            const gifPath = getGifPath(text);
+            if (gifPath) {
+                setImageSource(gifPath); // Cambia la imagen por el gif
+            } else {
+                Alert.alert("Error", `No se encontró el GIF para la palabra: ${text}`);
+                setImageSource(defaultImage); // Si el GIF no existe, vuelve a la imagen inicial
+            }
+    }
+    setIsPlaying(!isPlaying);
     };
 
     return (
@@ -89,7 +97,20 @@ const TranslatorEspLSC = () => {
                     />
                     
                     <TouchableOpacity style={styles.playButton} onPress={loadGif}>
-                        <Icon name="controller-play" type="entypo" color="#fff" size={30} />
+                    {!isPlaying ? (
+                        <Icon 
+                            name="controller-play"
+                            type="entypo" 
+                            color="#fff" 
+                            size={30} />
+                    ):(
+                        <Icon 
+                            name="pause"
+                            type="fontAwesome6" 
+                            color="#fff" 
+                            size={30} />  
+                    )}
+
                     </TouchableOpacity>
                 </View>
             
@@ -99,7 +120,7 @@ const TranslatorEspLSC = () => {
                 <View style={styles.inputWrapper}>
                 <TextInput
                     style={styles.textarea}
-                    value={text || transcript}
+                    value={text}
                     onChangeText={setText}
                     placeholder="Escribe aquí..."
                     placeholderTextColor="#350066"
@@ -112,15 +133,15 @@ const TranslatorEspLSC = () => {
                     <Icon 
                         style={styles.icon}
                         name= 'microphone'
-                        type='foundation'
+                        type='font-awesome'
                         color="#fff"
                     />  
                 
                 ) : ( 
                     <Icon
                         style={styles.icon}
-                        name= 'microphone'
-                        type="foundation"
+                        name= 'microphone-slash'
+                        type='font-awesome'
                         color="#fff"
                     />
                 
@@ -204,8 +225,8 @@ const styles = StyleSheet.create({
     },
     playButton: { 
         position: "absolute", 
-        bottom: 20, 
-        left: 20, 
+        bottom: 35, 
+        left: 25, 
         backgroundColor: "#350066", 
         padding: 12, 
         borderRadius: 30, 
