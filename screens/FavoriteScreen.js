@@ -4,6 +4,8 @@ import { Icon } from '@rneui/themed';
 import {AnimatedVideoCard}  from './elements/CardVideo.js';
 import { useContext } from "react";
 import { FavoritesContext } from "./context/FavoritesContext";
+import Share from 'react-native-share'
+import { Asset } from 'expo-asset';
 // import { Alert } from "react-native";
 
 
@@ -45,6 +47,31 @@ const FavoriteScreen = () => {
         // );
     }
 
+    const handleShare = async (imgPath) => {
+        try {
+            const asset = await Asset.loadAsync(imgPath);
+    
+            const fileUri = asset[0].localUri || asset[0].uri;
+        
+            if (!fileUri.startsWith("file://")) {
+              throw new Error("La imagen no se descargó correctamente.");
+            }
+        
+            // 3️⃣ Compartir la imagen y el texto
+            const options = {
+              title: "Compartir imagen y texto",
+              message: "Si quieres aprender más, descarga Hablemos 📲🤟🏻",
+              url: fileUri, // Ahora es una ruta válida
+              type: "image/jpeg",
+            };
+        
+            await Share.open(options);
+
+        } catch (error) {
+            console.error("Error al compartir:", error);
+        }
+    };
+
     return (
         <View style={styles.container} >
             {favorites.length === 0 ? (
@@ -74,7 +101,13 @@ const FavoriteScreen = () => {
                     <View style={styles.modalContainer} >
                         <TouchableWithoutFeedback>
                             <View style={styles.modalContent}>
-                                {selectedCard && (
+                                {selectedCard && selectedCard.sourceVideo && (
+                                    <>
+                                        <Image source={selectedCard.sourceVideo} style={styles.modalImage} />
+                                        <Text style={styles.modalText}>{selectedCard.word}</Text>
+                                    </>
+                                )}
+                                {selectedCard && !selectedCard.sourceVideo && (
                                     <>
                                         <Image source={selectedCard.source} style={styles.modalImage} />
                                         <Text style={styles.modalText}>{selectedCard.word}</Text>
@@ -100,7 +133,7 @@ const FavoriteScreen = () => {
                                         />
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity style={styles.modalButton}>
+                                    <TouchableOpacity style={styles.modalButton} onPress={() => handleShare(selectedCard.source)}>
                                         <Icon 
                                             name= 'share-alt'
                                             type='font-awesome'

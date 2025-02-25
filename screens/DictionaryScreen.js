@@ -6,6 +6,8 @@ import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { useContext } from "react";
 import { FavoritesContext } from "./context/FavoritesContext";
+import Share from 'react-native-share'
+import { Asset } from 'expo-asset';
 // import { Alert } from "react-native";
 
 
@@ -137,6 +139,31 @@ const Dictionary = () => {
 
     };
 
+    const handleShare = async (imgPath) => {
+        try {
+            const asset = await Asset.loadAsync(imgPath);
+    
+            const fileUri = asset[0].localUri || asset[0].uri;
+        
+            if (!fileUri.startsWith("file://")) {
+              throw new Error("La imagen no se descargó correctamente.");
+            }
+        
+            // 3️⃣ Compartir la imagen y el texto
+            const options = {
+              title: "Compartir imagen y texto",
+              message: "Si quieres aprender más, descarga Hablemos 📲🤟🏻",
+              url: fileUri, // Ahora es una ruta válida
+              type: "image/jpeg",
+            };
+        
+            await Share.open(options);
+
+        } catch (error) {
+            console.error("Error al compartir:", error);
+        }
+    };
+
     return (
         <View style={styles.container} >
             <FlatList 
@@ -229,7 +256,7 @@ const Dictionary = () => {
                                     />
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.modalButton}>
+                                <TouchableOpacity style={styles.modalButton} onPress={() => handleShare(selectedCard.source)}>
                                     <Icon 
                                         name= 'share-alt'
                                         type='font-awesome'
