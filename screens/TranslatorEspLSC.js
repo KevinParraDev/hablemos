@@ -187,7 +187,7 @@ const TranslatorEspLSC = () => {
                     <TouchableOpacity
                         style={styles.sideButtons}
                         onPress={() => navigation.navigate('Home')}
-                    >s
+                    >
                         <Image source={icons[0].source} style={styles.image}></Image>
                     </TouchableOpacity>
                     <TouchableOpacity 
