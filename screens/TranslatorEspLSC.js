@@ -38,26 +38,26 @@ const TranslatorEspLSC = () => {
         setText(newTranscript);
     });
     useSpeechRecognitionEvent("error", (event) => {
-      console.log("error code:", event.error, "error message:", event.message);
+        console.log("error code:", event.error, "error message:", event.message);
     });
 
     const handleStart = async () => {
         const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
         if (!result.granted) {
-          console.warn("Permissions not granted", result);
-          return;
+            console.warn("Permissions not granted", result);
+            return;
         }
         // Start speech recognition
         ExpoSpeechRecognitionModule.start({
-          lang: "es-CO",
-          interimResults: true, //Escritura al tiempo o despues de hablar
-          maxAlternatives: 1,
-          continuous: false, // Control para que se detenga automaticamente el reconocimiento, true:para detenerlo automaticamente
-          requiresOnDeviceRecognition: false, //Reconocimiento usando servicios en la nube, true:reconocimiento local, con el dispositivo
-          addsPunctuation: true,
+            lang: "es-CO",
+            interimResults: true, //Escritura al tiempo o despues de hablar
+            maxAlternatives: 1,
+            continuous: false, // Control para que se detenga automaticamente el reconocimiento, true:para detenerlo automaticamente
+            requiresOnDeviceRecognition: false, //Reconocimiento usando servicios en la nube, true:reconocimiento local, con el dispositivo
+            addsPunctuation: true,
         //   contextualStrings: ["Carlsen", "Nepomniachtchi", "Praggnanandhaa"], //palabras claves a priorizar o reconocer
         });
-      };
+    };
 
     const [imageSource, setImageSource] = useState(defaultImage);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -68,7 +68,8 @@ const TranslatorEspLSC = () => {
                 return require('../assets/Gif/Hola.gif');
             }else if (text.toLowerCase() == "gracias"){
                 return require('../assets/Gif/Gracias.gif');
-            }
+            } else if (text.toLowerCase() == "¿cómo estás?")
+                return require('../assets/Gif/ComoEstas.gif');
         } catch (error) {
             return null;
         }
@@ -161,48 +162,27 @@ const TranslatorEspLSC = () => {
                 </TouchableOpacity>
                 </View>
             </View>
-
-{/*                 
-                <View style={styles.textContainer}>
-                    <Text style={styles.subtitle}>Texto - Audio</Text>
-                    <View style={styles.inputWrapper}>
-                        <TextInput
-                            style={styles.textarea}
-                            value={text}
-                            onChangeText={setText}
-                            placeholder="Escribe aquí..."
-                            placeholderTextColor="#350066"
-                            multiline={true}
-                            numberOfLines={4}
-                            textAlignVertical="top"
-                        />
-                        <TouchableOpacity style={styles.micButton}>
-                            <Icon name="microphone" type="foundation" color="#fff" size={24} />
-                        </TouchableOpacity>
-                    </View>
-                </View> */}
-
                 
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={styles.sideButtons}
-                        onPress={() => navigation.navigate('Home')}
-                    >
-                        <Image source={icons[0].source} style={styles.image}></Image>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                        style={styles.centerButton}
-                        onPress={() => navigation.navigate('TranslatorLSCEsp')}
-                    >
-                        <Image source={icons[1].source} style={styles.imageCenter}></Image>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.sideButtons}
-                        onPress={() => navigation.navigate('Dictionary')}
-                    >
-                        <Image source={icons[2].source} style={styles.image}></Image>
-                    </TouchableOpacity>
-                </View>
+            <View style={styles.buttonsContainer}>
+                <TouchableOpacity
+                    style={styles.sideButtons}
+                    onPress={() => navigation.navigate('Home')}
+                >
+                    <Image source={icons[0].source} style={styles.image}></Image>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={styles.centerButton}
+                    onPress={() => navigation.navigate('TranslatorLSCEsp')}
+                >
+                    <Image source={icons[1].source} style={styles.imageCenter}></Image>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.sideButtons}
+                    onPress={() => navigation.navigate('Dictionary')}
+                >
+                    <Image source={icons[2].source} style={styles.image}></Image>
+                </TouchableOpacity>
+            </View>
             
         </ScrollView> 
         </KeyboardAvoidingView>
@@ -227,16 +207,16 @@ const styles = StyleSheet.create({
         position: "relative" 
     },
     lscVideo: { 
-        width: "90%", 
+        width: "100%", 
         height: 392, 
         borderRadius: 20, 
-        borderWidth: 2, 
+        borderWidth: 4, 
         borderColor: "#350066" 
     },
     playButton: { 
         position: "absolute", 
-        bottom: 35, 
-        left: 25, 
+        bottom: 20, 
+        right: 15, 
         backgroundColor: "#350066", 
         padding: 12, 
         borderRadius: 30, 
@@ -254,8 +234,8 @@ const styles = StyleSheet.create({
         width: "100%", 
         flexDirection: "row", 
         alignItems: "center", 
-        borderWidth: 2, 
-        borderRadius: 10, 
+        borderWidth: 4, 
+        borderRadius: 20, 
         borderColor: "#350066", 
         backgroundColor: "#f9f9f9", 
         paddingHorizontal: 10, 
@@ -266,7 +246,8 @@ const styles = StyleSheet.create({
         fontSize: 16, 
         height: 130,
         color: "#350066", 
-        paddingVertical: 10 
+        paddingVertical: 10,
+        fontWeight: '500',
     },
     micButton: { 
         backgroundColor: "#350066", 
@@ -283,7 +264,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-evenly', 
-        bottom: 10,
+        bottom: 0,
         marginLeft: 20
     },
     centerButton: { 

@@ -88,7 +88,7 @@ function transformLandmarks(landmarks){
 
 const TranslatorLSCEsp = () => {
 
-    const thingToSay = "Dice Yeison que a dormir"
+    const thingToSay = "Aquí aparecerá la interpretación de las señas"
     const [isplay, setIsplay] = useState(false);
 
     const speak = () => {
@@ -105,7 +105,7 @@ const TranslatorLSCEsp = () => {
             Speech.stop();
             setIsplay(false);
         }
-      };
+    };
 
     const paint = Skia.Paint();
     paint.setStyle(PaintStyle.Fill);
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: 0,
         padding: 25,
-        backgroundColor: '#d7e6fa',
+        backgroundColor: '#e6f9da',
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -360,7 +360,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         position: 'relative',
         borderWidth: 4,
-        borderColor: '#350066'
+        borderColor: '#350066',
+        borderRadius: 20,
+        overflow: 'hidden'
     },
 
     lscVideo: {

@@ -8,8 +8,6 @@ import { useContext } from "react";
 import { FavoritesContext } from "./context/FavoritesContext";
 import Share from 'react-native-share'
 import { Asset } from 'expo-asset';
-// import { Alert } from "react-native";
-
 
 const cardsExample = [
     {
@@ -23,12 +21,13 @@ const cardsExample = [
         word: 'Gracias'
     },
     {
-        source: require('../assets/images/imageTest.png'),
-        word: 'Cama'
+        source: require('../assets/images/ComoEstas.jpg'),
+        sourceVideo:  require('../assets/Gif/ComoEstas.gif'),
+        word: '¿ Cómo estás ?'
     },
     {
         source: require('../assets/images/imageTest.png'),
-        word: 'Movil'
+        word: 'Móvil'
     },
     {
         source: require('../assets/images/imageTest.png'),
@@ -146,15 +145,15 @@ const Dictionary = () => {
             const fileUri = asset[0].localUri || asset[0].uri;
         
             if (!fileUri.startsWith("file://")) {
-              throw new Error("La imagen no se descargó correctamente.");
+                throw new Error("La imagen no se descargó correctamente.");
             }
         
             // 3️⃣ Compartir la imagen y el texto
             const options = {
-              title: "Compartir imagen y texto",
-              message: "Si quieres aprender más, descarga Hablemos 📲🤟🏻",
-              url: fileUri, // Ahora es una ruta válida
-              type: "image/jpeg",
+                title: "Compartir imagen y texto",
+                message: "Si quieres aprender más, descarga Hablemos 📲🤟🏻",
+                url: fileUri, // Ahora es una ruta válida
+                type: "image/jpeg",
             };
         
             await Share.open(options);

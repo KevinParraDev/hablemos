@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Image, ImageBackground} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import  {db}  from "../src/firebaseConfig";
@@ -25,7 +25,21 @@ const addUser = async () => {
 // Llama a la función para probar
 addUser();
 
-const homeVideo = require('../assets/Gif/Hola.gif')
+const icons = [
+    {   
+        source: require('../assets/Icons/icon_translate_lsc_spn.png')
+        
+    },
+    {
+        source: require('../assets/Icons/icon_translate_spn_lsc.png')
+    },
+    {
+        source: require('../assets/Icons/icon_dictionary.png')
+    },
+]
+
+const homeVideo = require('../assets/Gif/Hola.gif');
+const background = require("../assets/Backgrounds/bg_azul.png");
 
 const HomeScreen = () => {
 
@@ -39,11 +53,12 @@ const HomeScreen = () => {
             </Text>
             <Image source={homeVideo} style={styles.homeVideo}/>
             <Text style={styles.saludo}>¡Hola!</Text>
+            {/* <Image source={background}/> */}
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
                     onPress={() => start()}
                     style={StyleSheet.compose(styles.button, {backgroundColor: '#cdf9f6'})}
-                >
+                >   
                     <Text style={styles.buttonText}>
                         Tutorial
                     </Text>
@@ -52,7 +67,8 @@ const HomeScreen = () => {
                     <WalkthroughableTouchable 
                         onPress={() => navigation.navigate("TranslatorLSCEsp")}
                         style={StyleSheet.compose(styles.button, {backgroundColor: '#e6f9da'})}
-                    >
+                    >   
+                        <Image source={icons[0].source} style={styles.image}></Image>
                         <Text style={styles.buttonText}>
                             LSC - ESP
                         </Text>
@@ -63,7 +79,8 @@ const HomeScreen = () => {
                     <WalkthroughableTouchable
                         onPress={() => navigation.navigate("TranslatorEspLSC")}
                         style={StyleSheet.compose(styles.button, {backgroundColor: '#d7e6fa'})}
-                    >
+                    >   
+                        <Image source={icons[1].source} style={styles.image}></Image>
                         <Text style={styles.buttonText}>
                             ESP - LSC
                         </Text>
@@ -74,7 +91,8 @@ const HomeScreen = () => {
                     <WalkthroughableTouchable
                         onPress={() => navigation.navigate("Dictionary")}
                         style={StyleSheet.compose(styles.button, {backgroundColor: '#ffdbde'})}
-                    >
+                    >   
+                        <Image source={icons[2].source} style={styles.image}></Image>
                         <Text style={styles.buttonText}>
                             Diccionario
                         </Text>
@@ -82,6 +100,7 @@ const HomeScreen = () => {
                 </CopilotStep>
             </View>
         </View>
+        
     )
 }
 
@@ -120,12 +139,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     button: {
+        display: 'flex',
+        flexDirection: 'row',
         width: 200,
+        height: 55,
         backgroundColor: '#cdf9f6',
         borderRadius: 20,
         padding: 10,
-        alignSelf: "center",
         alignItems: 'center',
+        justifyContent: 'space-around',
         marginBottom: 10,
         borderWidth: 3,
         borderColor: '#350066'
@@ -134,6 +156,21 @@ const styles = StyleSheet.create({
         color: '#350066',
         fontSize: 20,
         fontWeight: 'bold'
+    },
+    image: {
+        width: 50,
+        height: 50,
+    },
+    background: {
+        // position: "absolute",
+        // top: 0,
+        // left: 0,
+        // right: 0,
+        // bottom: 0,
+        resizeMode: 'contain',
+        // width: 200,
+        // height: 20,
+        zIndex: -1,
     }
 })
 
