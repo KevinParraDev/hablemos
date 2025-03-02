@@ -1,15 +1,15 @@
 import React, {useRef, useEffect} from "react";
-import { TouchableHighlight ,StyleSheet, View, Text, Image, Animated} from "react-native";
+import {StyleSheet, View, Text, Image, Animated, TouchableOpacity} from "react-native";
 
 export const VideoCard = ({video, word, onPress }) => {
 
     return (
-        <TouchableHighlight style={styles.card} onPress={onPress} >
+        <TouchableOpacity style={styles.card} onPress={onPress} >
             <View >
                 <Image source={video} style={styles.video}></Image>
                 <Text style={styles.text}> {word} </Text>
             </View>
-        </TouchableHighlight>
+        </TouchableOpacity>
     );
 }
 
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         borderWidth: 3,
         borderColor: '#350066',
-        overflow: 'hidden'
+        overflow: 'hidden',
     },
     video: {
         width: 170,

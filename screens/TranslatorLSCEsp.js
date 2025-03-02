@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback} from "react";
 import { TextInput, StyleSheet, View, Text, TouchableOpacity, Keyboard, ScrollView, NativeModules, NativeEventEmitter, Platform,  Image} from "react-native";
 import { useSharedValue } from "react-native-worklets-core";
 import { useNavigation } from "@react-navigation/native";
 import { Icon } from '@rneui/themed';
+import { StatusBar } from 'expo-status-bar';
+import * as NavigationBar from 'expo-navigation-bar';
+import { useFocusEffect } from "@react-navigation/native";
 
 import { 
     Camera, 
@@ -189,6 +192,13 @@ const TranslatorLSCEsp = () => {
         return () => clearInterval(interval);
     }, []);
 
+    // Color de la barra de navegacion
+    useFocusEffect(
+        useCallback(() => {
+            NavigationBar.setBackgroundColorAsync("#e6f9da"); // Cambia el color al enfocar la pantalla
+        }, [])
+    );
+
     const getBubbleStyle = (index) => {
         const baseOpacity =  1- (0.2*index);
         return{
@@ -244,97 +254,99 @@ const TranslatorLSCEsp = () => {
     
 
     const pixelFormat = Platform.OS === 'ios' ? 'rgb' : 'yuv';
+    const background = require("../assets/Backgrounds/bg_verde.png");
 
     return (
-        <View style={styles.container}>
-            {!isKeyboardOpen && (
-                <View style={styles.lscContainer}>
-                    <ScrollView horizontal={true} style={styles.scrollView}>
-                        {words.map((word, index) => (
-                            <View key={index} style={getBubbleStyle(index)}>
-                                <Text style={styles.textBubble}>{word}</Text>
-                            </View>
-                        ))}
-                    </ScrollView>
-                    <View style = {styles.lscVideoContainer}>
-                        {!hasPermission && <Text style={styles.subtitle}>No hay permiso de la cámara</Text>}
-                        {hasPermission && device != null && (
-                            <Camera
-                            style={styles.lscVideo}
-                            device={device}
-                            isActive={true}
-                            frameProcessor={frameProcessor}
-                            pixelFormat={pixelFormat}
-                            />
-                        )}
+        <>  
+            <StatusBar style="dark" backgroundColor='#e6f9da' />
+            <View style={styles.container}>
+                <Image source={background} style={styles.background}/>
+                {!isKeyboardOpen && (
+                    <View style={styles.lscContainer}>
+                        <ScrollView horizontal={true} style={styles.scrollView}>
+                            {words.map((word, index) => (
+                                <View key={index} style={getBubbleStyle(index)}>
+                                    <Text style={styles.textBubble}>{word}</Text>
+                                </View>
+                            ))}
+                        </ScrollView>
+                        <View style = {styles.lscVideoContainer}>
+                            {!hasPermission && <Text style={styles.subtitle}>No hay permiso de la cámara</Text>}
+                            {hasPermission && device != null && (
+                                <Camera
+                                style={styles.lscVideo}
+                                device={device}
+                                isActive={true}
+                                frameProcessor={frameProcessor}
+                                pixelFormat={pixelFormat}
+                                />
+                            )}
+                        </View>
                     </View>
-                </View>
-            )}
-
-            <View style = {styles.interpretationContainer}>
-                <Text style={styles.subtitle}>Interpretación</Text>
-                <TextInput
-                    style={styles.textarea}
-                    value={text}
-                    onChangeText={thingToSay}
-                    editable={false}
-                    placeholder="Aquí aparecerá la interpretación de las señas..."
-                    placeholderTextColor="#350066"
-                    multiline={true} // Permite múltiples líneas
-                    numberOfLines={4} // Define una altura inicial (opcional)
-                    textAlignVertical="top" // Alinea el texto en la parte superior
-                    
-                />
-                <TouchableOpacity style={styles.button} onPress={speak}>
-                {!isplay ? (
-                    <Icon 
-                        style={styles.icon}
-                        name= 'volume-2'
-                        type='feather'
-                        color= '#350066'
-                    />
-                ):(
-                    <Icon 
-                        style={styles.icon}
-                        name= 'pause'
-                        type='foundation'
-                        color= '#350066'
-                    /> 
                 )}
-                </TouchableOpacity>
+
+                <View style = {styles.interpretationContainer}>
+                    <Text style={styles.subtitle}>Interpretación</Text>
+                    <TextInput
+                        style={styles.textarea}
+                        value={text}
+                        onChangeText={thingToSay}
+                        editable={false}
+                        placeholder="Aquí aparecerá la interpretación de las señas..."
+                        placeholderTextColor="#350066"
+                        multiline={true} // Permite múltiples líneas
+                        numberOfLines={4} // Define una altura inicial (opcional)
+                        textAlignVertical="top" // Alinea el texto en la parte superior
+                        
+                    />
+                    <TouchableOpacity style={styles.button} onPress={speak}>
+                    {!isplay ? (
+                        <Icon 
+                            style={styles.icon}
+                            name= 'volume-2'
+                            type='feather'
+                            color="#fff"
+                        />
+                    ):(
+                        <Icon 
+                            style={styles.icon}
+                            name= 'pause'
+                            type='foundation'
+                            color="#fff"
+                        /> 
+                    )}
+                    </TouchableOpacity>
+                </View>
+                
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity
+                        style={styles.sideButtons}
+                        onPress={() => navigation.navigate('Home')}
+                    >
+                        <Image source={icons[0].source} style={styles.image}></Image>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={styles.centerButton}
+                        onPress={() => navigation.navigate('TranslatorEspLSC')}
+                    >
+                        <Image source={icons[1].source} style={styles.imageCenter}></Image>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.sideButtons}
+                        onPress={() => navigation.navigate('Dictionary')}
+                    >
+                        <Image source={icons[2].source} style={styles.image}></Image>
+                    </TouchableOpacity>
+                </View>
             </View>
-            
-            <View style={styles.buttonsContainer}>
-                <TouchableOpacity
-                    style={styles.sideButtons}
-                    onPress={() => navigation.navigate('Home')}
-                >
-                    <Image source={icons[0].source} style={styles.image}></Image>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    style={styles.centerButton}
-                    onPress={() => navigation.navigate('TranslatorEspLSC')}
-                >
-                    <Image source={icons[1].source} style={styles.imageCenter}></Image>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.sideButtons}
-                    onPress={() => navigation.navigate('Dictionary')}
-                >
-                    <Image source={icons[2].source} style={styles.image}></Image>
-                </TouchableOpacity>
-            </View>
-            
+        </>
         
-        </View>
     )
 }
 
 const styles = StyleSheet.create({
     container:  {
         flex: 1,
-        paddingTop: 0,
-        padding: 25,
         backgroundColor: '#e6f9da',
         alignItems: 'center',
         justifyContent: 'center'
@@ -342,16 +354,19 @@ const styles = StyleSheet.create({
 
     lscContainer: {
         width: '100%',
-        height: 400,
+        height: 450,
         alignItems: 'center',
-        position: 'relative'
+        position: 'relative',
+        paddingLeft: 25,
+        paddingRight: 25,
     },
 
     interpretationContainer: {
         width: '100%',
         alignItems: 'center',
-        padingTop: 2,
         height: '35%',
+        paddingLeft: 25,
+        paddingRight: 25,
     },
 
     lscVideoContainer: {
@@ -373,9 +388,9 @@ const styles = StyleSheet.create({
     button: {
         position: 'absolute',
         alignContent: 'center',
-        bottom: 95,
-        right: 15,
-        backgroundColor: '#ffffff',
+        bottom: 120,
+        right: 35,
+        backgroundColor: "#350066", 
         paddingVertical: 8,
         paddingHorizontal: 12,
         width: 50,
@@ -446,7 +461,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 4,
         borderColor: '#350066',
-        backgroundColor: '#d7e6fa',
+        backgroundColor: '#d6cffb',
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -487,6 +502,12 @@ const styles = StyleSheet.create({
     textBubble: {
         color: '#000',
     },
+    background: {
+        width: '100%',
+        height: 400,
+        position: "absolute",
+        bottom: 230
+    }
 })
 
 export default TranslatorLSCEsp;

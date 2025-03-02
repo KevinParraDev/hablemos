@@ -1,4 +1,4 @@
-import React, {useEffect, useLayoutEffect} from "react";
+import React, {useEffect, useCallback} from "react";
 import { StyleSheet, View, Text, TextInput, FlatList,TouchableOpacity, Image, Modal, TouchableWithoutFeedback} from "react-native";
 import { Icon } from '@rneui/themed';
 import {AnimatedVideoCard}  from './elements/CardVideo.js';
@@ -7,7 +7,10 @@ import { useState } from "react";
 import { useContext } from "react";
 import { FavoritesContext } from "./context/FavoritesContext";
 import Share from 'react-native-share'
+import { StatusBar } from 'expo-status-bar';
 import { Asset } from 'expo-asset';
+import { useFocusEffect } from "@react-navigation/native";
+import * as NavigationBar from 'expo-navigation-bar';
 
 const cardsExample = [
     {
@@ -67,6 +70,8 @@ const icons = [
     },
 ]
 
+const background = require("../assets/Backgrounds/bg_rojo.png");
+
 const Dictionary = () => {
 
     const navigation = useNavigation();
@@ -104,7 +109,8 @@ const Dictionary = () => {
 
     useEffect(() => {
         navigation.setOptions({
-            headerSearchBarOptions: showSearch  ? {
+
+            headerSearchBarOptions: (showSearch || searchQuery !== '')  ? {
                 inputType: 'text',
                 textColor: '#350066',
                 hintTextColor: '#350066',
@@ -124,6 +130,13 @@ const Dictionary = () => {
             setIsFavorite(favorites.some(fav => fav.word === selectedCard.word));
         }
     }, [selectedCard, favorites]);
+
+    // Color de la barra de navegacion
+    useFocusEffect(
+        useCallback(() => {
+            NavigationBar.setBackgroundColorAsync("#ffdbde"); // Cambia el color al enfocar la pantalla
+        }, [])
+    );
 
     const handleAddToFavorites = () => {
         if (isFavorite) {
@@ -164,112 +177,118 @@ const Dictionary = () => {
     };
 
     return (
-        <View style={styles.container} >
-            <FlatList 
-                data={cards}
-                onScroll={handleScroll}
-                keyExtractor={(item) => item.word}
-                renderItem={ ({item, index}) =>    
-                    <AnimatedVideoCard 
-                        video={item.source} 
-                        word={item.word} 
-                        onPress={() => openModal(item)}
-                        index={index}
-                    />
-                }
-                numColumns={2}
-                columnWrapperStyle={styles.viewCard}
-                ListHeaderComponent={
-                    <>
-                        <TextInput 
-                            placeholder='Buscar...'
-                            inputMode= 'search'
-                            placeholderTextColor='#350066'
-                            enterKeyHint='search'
-                            maxLength={30}
-                            onChangeText={(search) => setSearchQuery(search)}
-                            style={styles.searchBar}
-                        />
-                        <Icon 
-                            name= 'search'
-                            type='font-awesome'
-                            color= '#350066'
-                            containerStyle={styles.iconSearch}
-                        />
-                    </>
-                }
-            />
-            <View style={styles.buttonsContainer}>
-                <TouchableOpacity
-                    style={styles.sideButtons}
-                    onPress={() => navigation.navigate('TranslatorLSCEsp')}
-                >
-                    <Image source={icons[0].source} style={styles.image}></Image>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    style={styles.centerButton}
-                    onPress={() => navigation.navigate('Home')}
-                >
-                    <Image source={icons[1].source} style={styles.imageCenter}></Image>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.sideButtons}
-                    onPress={() => navigation.navigate('TranslatorEspLSC')}
-                >
-                    <Image source={icons[2].source} style={styles.image}></Image>
-                </TouchableOpacity>
-            </View>
-            <Modal visible={modalVisible} animationType="slide" transparent={true}>
-                <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-                    <View style={styles.modalContainer}>
-                        <TouchableWithoutFeedback>
-                        <View style={styles.modalContent} >
-                            {selectedCard && selectedCard.sourceVideo && (
-                                <>
-                                    <Image source={selectedCard.sourceVideo} style={styles.modalImage} />
-                                    <Text style={styles.modalText}>{selectedCard.word}</Text>
-                                </>
-                            )}
-                            {selectedCard && !selectedCard.sourceVideo && (
-                                <>
-                                    <Image source={selectedCard.source} style={styles.modalImage} />
-                                    <Text style={styles.modalText}>{selectedCard.word}</Text>
-                                </>
-                            )}
-                            <View style={styles.buttonsMContainer}>
-                                <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
-                                    <Icon 
-                                        name= 'arrow-left'
-                                        type='font-awesome'
-                                        color= '#350066'
-                                        containerStyle={styles.modalIcon}
-                                    />
-                                </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.favoriteButton} onPress={handleAddToFavorites}>
-                                    <Icon 
-                                        name= 'star'
-                                        type='font-awesome'
-                                        color= '#350066'
-                                        containerStyle={styles.favoriteIcon}
-                                    />
-                                </TouchableOpacity>
+        <>
+            <StatusBar style="dark" backgroundColor='#ffdbde'/>
+            <View style={styles.container} >
+                <Image source={background} style={styles.background}/>
+                <FlatList 
+                    data={cards}
+                    onScroll={handleScroll}
+                    keyExtractor={(item) => item.word}
+                    renderItem={ ({item, index}) =>    
+                        <AnimatedVideoCard 
+                            video={item.source} 
+                            word={item.word} 
+                            onPress={() => openModal(item)}
+                            index={index}
+                        />
+                    }
+                    numColumns={2}
+                    columnWrapperStyle={styles.viewCard}
+                    ListHeaderComponent={
+                        <>
+                            <TextInput 
+                                placeholder='Buscar...'
+                                inputMode= 'search'
+                                placeholderTextColor='#350066'
+                                enterKeyHint='search'
+                                maxLength={30}
+                                onChangeText={(search) => setSearchQuery(search)}
+                                style={styles.searchBar}
+                            />
+                            <Icon 
+                                name= 'search'
+                                type='font-awesome'
+                                color= '#350066'
+                                containerStyle={styles.iconSearch}
+                            />
+                        </>
+                    }
+                    ListFooterComponent={<View style={{ height: 85 }} />} 
+                />
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity
+                        style={styles.sideButtons}
+                        onPress={() => navigation.navigate('TranslatorLSCEsp')}
+                    >
+                        <Image source={icons[2].source} style={styles.image}></Image>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={styles.centerButton}
+                        onPress={() => navigation.navigate('Home')}
+                    >
+                        <Image source={icons[1].source} style={styles.imageCenter}></Image>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.sideButtons}
+                        onPress={() => navigation.navigate('TranslatorEspLSC')}
+                    >
+                        <Image source={icons[0].source} style={styles.image}></Image>
+                    </TouchableOpacity>
+                </View>
+                <Modal visible={modalVisible} animationType="slide" transparent={true}>
+                    <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+                        <View style={styles.modalContainer}>
+                            <TouchableWithoutFeedback>
+                            <View style={styles.modalContent} >
+                                {selectedCard && selectedCard.sourceVideo && (
+                                    <>
+                                        <Image source={selectedCard.sourceVideo} style={styles.modalImage} />
+                                        <Text style={styles.modalText}>{selectedCard.word}</Text>
+                                    </>
+                                )}
+                                {selectedCard && !selectedCard.sourceVideo && (
+                                    <>
+                                        <Image source={selectedCard.source} style={styles.modalImage} />
+                                        <Text style={styles.modalText}>{selectedCard.word}</Text>
+                                    </>
+                                )}
+                                <View style={styles.buttonsMContainer}>
+                                    <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
+                                        <Icon 
+                                            name= 'arrow-left'
+                                            type='font-awesome'
+                                            color= '#350066'
+                                            containerStyle={styles.modalIcon}
+                                        />
+                                    </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.modalButton} onPress={() => handleShare(selectedCard.source)}>
-                                    <Icon 
-                                        name= 'share-alt'
-                                        type='font-awesome'
-                                        color= '#350066'
-                                        containerStyle={styles.modalIcon}
-                                    />
-                                </TouchableOpacity>
+                                    <TouchableOpacity style={styles.favoriteButton} onPress={handleAddToFavorites}>
+                                        <Icon 
+                                            name= 'star'
+                                            type='font-awesome'
+                                            color= '#350066'
+                                            containerStyle={styles.favoriteIcon}
+                                        />
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity style={styles.modalButton} onPress={() => handleShare(selectedCard.source)}>
+                                        <Icon 
+                                            name= 'share-alt'
+                                            type='font-awesome'
+                                            color= '#350066'
+                                            containerStyle={styles.modalIcon}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
+                            </TouchableWithoutFeedback>
                         </View>
-                        </TouchableWithoutFeedback>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
-        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
+            </View>
+        </>
     );
 }
 
@@ -319,7 +338,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 4,
         borderColor: '#350066',
-        backgroundColor: '#d7e6fa'
+        backgroundColor: '#d6cffb'
     },
     centerButton: {
         width: 70,
@@ -404,7 +423,6 @@ const styles = StyleSheet.create({
         width: 35,
         height: 35,
     },
-
     imageCenter: {
         position: 'relative',
         marginLeft: 2,
@@ -412,6 +430,12 @@ const styles = StyleSheet.create({
         width: 55,
         height: 55,
     },
+    background: {
+        width: '100%',
+        height: 400,
+        position: "absolute",
+        bottom: 90,
+    }
 });
 
 export default Dictionary;

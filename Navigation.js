@@ -1,3 +1,4 @@
+import React, {useEffect, useState} from "react";
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import HomeScreen from './screens/HomeScreen';
 import TranslatorLSCEsp from './screens/TranslatorLSCEsp';
@@ -13,6 +14,7 @@ import {CopilotProvider}  from 'react-native-copilot';
 const StackNavigator = createNativeStackNavigator();
 
 function Navigation(){
+
     return (
         <CopilotProvider 
             tooltipStyle={styles.toolTutorial}  
@@ -22,7 +24,7 @@ function Navigation(){
             skip: "Saltar",      
             finish: "Finalizar"  
             }}
-            verticalOffset={39}  
+            verticalOffset={0}  
         >
             <FavoritesProvider>
                 <NavigationContainer>
@@ -67,11 +69,12 @@ function Navigation(){
                         name='Dictionary'
                         component={Dictionary}
                         options={ ({navigation}) => ({
-                            title: 'Diccionario',
+                            headerTitle: 'Diccionario',
                             headerStyle: styles.dictionaryHeader,
                             headerTitleStyle: styles.headerTitle,
                             headerTitleAlign: 'center',
-                            headerBackVisible: false, style: styles.backButton,
+                            headerBackVisible: false, 
+                            style: styles.backButton,
                             shouldShowHintSearchIcon: true,
                             headerLeft: () =>
                                 <TouchableOpacity 

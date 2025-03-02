@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image, ImageBackground} from "react-native";
+import React, {useCallback} from "react";
+import { StyleSheet, View, Text, TouchableOpacity, Image} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import  {db}  from "../src/firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { useCopilot, CopilotStep, walkthroughable } from 'react-native-copilot';
+import { StatusBar } from 'expo-status-bar';
+import * as NavigationBar from 'expo-navigation-bar';
+import { useFocusEffect } from "@react-navigation/native";
 
 // Definimos los componentes que van a ser resaltados en el tutorial
 const WalkthroughableTouchable = walkthroughable(TouchableOpacity);
@@ -41,73 +44,81 @@ const icons = [
 const homeVideo = require('../assets/Gif/Hola.gif');
 const background = require("../assets/Backgrounds/bg_azul.png");
 
-const HomeScreen = () => {
+const HomeScreen = ({ onHomeReady })  => {
 
     const navigation = useNavigation();
     const { start } = useCopilot();
 
+    // Color de la barra de navegacion
+    useFocusEffect(
+        useCallback(() => {
+            NavigationBar.setBackgroundColorAsync("#cdf9f6"); // Cambia el color al enfocar la pantalla
+        }, [])
+    );
+
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>
-                Hablemos
-            </Text>
-            <Image source={homeVideo} style={styles.homeVideo}/>
-            <Text style={styles.saludo}>¡Hola!</Text>
-            {/* <Image source={background}/> */}
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                    onPress={() => start()}
-                    style={StyleSheet.compose(styles.button, {backgroundColor: '#cdf9f6'})}
-                >   
-                    <Text style={styles.buttonText}>
-                        Tutorial
-                    </Text>
-                </TouchableOpacity>
-                <CopilotStep name='LSC-ESP' order={1} text='Aquí podrás realizar la traducción de señas a español.'>
-                    <WalkthroughableTouchable 
-                        onPress={() => navigation.navigate("TranslatorLSCEsp")}
-                        style={StyleSheet.compose(styles.button, {backgroundColor: '#e6f9da'})}
+        <>
+            <StatusBar style="dark" backgroundColor="#cdf9f6" />
+            <View style={styles.container}>
+                <Text style={styles.title}>
+                    Hablemos
+                </Text>
+                <Image source={homeVideo} style={styles.homeVideo}/>
+                <Text style={styles.saludo}>¡Hola!</Text>
+                <Image source={background} style={styles.background}/>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                        onPress={() => start()}
+                        style={StyleSheet.compose(styles.button, {backgroundColor: '#cdf9f6'})}
                     >   
-                        <Image source={icons[0].source} style={styles.image}></Image>
                         <Text style={styles.buttonText}>
-                            LSC - ESP
+                            Tutorial
                         </Text>
-                    </WalkthroughableTouchable>
-                </CopilotStep>
+                    </TouchableOpacity>
+                    <CopilotStep name='LSC-ESP' order={1} text='Aquí podrás realizar la traducción de señas a español.'>
+                        <WalkthroughableTouchable 
+                            onPress={() => navigation.navigate("TranslatorLSCEsp")}
+                            style={StyleSheet.compose(styles.button, {backgroundColor: '#e6f9da'})}
+                        >   
+                            <Image source={icons[0].source} style={styles.image}></Image>
+                            <Text style={styles.buttonText}>
+                                LSC - ESP
+                            </Text>
+                        </WalkthroughableTouchable>
+                    </CopilotStep>
 
-                <CopilotStep name='ESP-LSC' order={2} text='Aquí podrás realizar la traducción de español a señas.'>
-                    <WalkthroughableTouchable
-                        onPress={() => navigation.navigate("TranslatorEspLSC")}
-                        style={StyleSheet.compose(styles.button, {backgroundColor: '#d7e6fa'})}
-                    >   
-                        <Image source={icons[1].source} style={styles.image}></Image>
-                        <Text style={styles.buttonText}>
-                            ESP - LSC
-                        </Text>
-                    </WalkthroughableTouchable>
-                </CopilotStep>
+                    <CopilotStep name='ESP-LSC' order={2} text='Aquí podrás realizar la traducción de español a señas.'>
+                        <WalkthroughableTouchable
+                            onPress={() => navigation.navigate("TranslatorEspLSC")}
+                            style={StyleSheet.compose(styles.button, {backgroundColor: '#d7e6fa'})}
+                        >   
+                            <Image source={icons[1].source} style={styles.image}></Image>
+                            <Text style={styles.buttonText}>
+                                ESP - LSC
+                            </Text>
+                        </WalkthroughableTouchable>
+                    </CopilotStep>
 
-                <CopilotStep name='Diccionario' order={3} text='Aquí encontrarás distintas palabras y su seña correspondiente.'>
-                    <WalkthroughableTouchable
-                        onPress={() => navigation.navigate("Dictionary")}
-                        style={StyleSheet.compose(styles.button, {backgroundColor: '#ffdbde'})}
-                    >   
-                        <Image source={icons[2].source} style={styles.image}></Image>
-                        <Text style={styles.buttonText}>
-                            Diccionario
-                        </Text>
-                    </WalkthroughableTouchable>
-                </CopilotStep>
+                    <CopilotStep name='Diccionario' order={3} text='Aquí encontrarás distintas palabras y su seña correspondiente.'>
+                        <WalkthroughableTouchable
+                            onPress={() => navigation.navigate("Dictionary")}
+                            style={StyleSheet.compose(styles.button, {backgroundColor: '#ffdbde'})}
+                        >   
+                            <Image source={icons[2].source} style={styles.image}></Image>
+                            <Text style={styles.buttonText}>
+                                Diccionario
+                            </Text>
+                        </WalkthroughableTouchable>
+                    </CopilotStep>
+                </View>
             </View>
-        </View>
-        
+        </>
     )
 }
 
 const styles = StyleSheet.create({
     container:  {
         flex: 1,
-        padding: 20,
         paddingTop: Constants.statusBarHeight,
         backgroundColor: '#cdf9f6',
         alignItems: 'center'
@@ -162,15 +173,10 @@ const styles = StyleSheet.create({
         height: 50,
     },
     background: {
-        // position: "absolute",
-        // top: 0,
-        // left: 0,
-        // right: 0,
-        // bottom: 0,
-        resizeMode: 'contain',
-        // width: 200,
-        // height: 20,
-        zIndex: -1,
+        width: '100%',
+        height: 400,
+        position: "absolute",
+        bottom: 110,
     }
 })
 

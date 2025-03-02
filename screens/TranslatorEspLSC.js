@@ -1,9 +1,12 @@
-import React, { useState } from "react";
-import { TextInput, StyleSheet, View, Text, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
+import React, { useState, useCallback } from "react";
+import { TextInput, StyleSheet, View, Text, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView, Platform, TouchableWithoutFeedback } from "react-native";
 import { Image } from "expo-image"; // Para soportar los gifs manitos
 import { Icon } from "@rneui/themed";
 import { useNavigation } from "@react-navigation/native";
+import { StatusBar } from 'expo-status-bar';
 import Constants from "expo-constants";
+import { useFocusEffect } from "@react-navigation/native";
+import * as NavigationBar from 'expo-navigation-bar';
 import {
     ExpoSpeechRecognitionModule,
     useSpeechRecognitionEvent,
@@ -22,6 +25,8 @@ const icons = [
         source: require('../assets/Icons/icon_dictionary.png')
     }
 ]
+
+const background = require("../assets/Backgrounds/bg_morado.png");
 
 const TranslatorEspLSC = () => {
     
@@ -95,116 +100,129 @@ const TranslatorEspLSC = () => {
     setIsPlaying(!isPlaying);
     };
 
+    // Color de la barra de navegacion
+    useFocusEffect(
+        useCallback(() => {
+            NavigationBar.setBackgroundColorAsync("#d7e6fa"); // Cambia el color al enfocar la pantalla
+        }, [])
+    );
+
     return (
-        <KeyboardAvoidingView
+        <> 
+            <StatusBar style="dark" backgroundColor="#d7e6fa" />
+            <KeyboardAvoidingView
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
+            >   
 
-        <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">       
-                <View style={styles.lscContainer}>
-                    <Image 
-                        style={styles.lscVideo} 
-                        source={imageSource} 
-                        contentFit="cover"
-                    />
+                <Image source={background} style={styles.background}/>
+
+                <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">       
+
+                        <View style={styles.lscContainer}>
+                            <Image 
+                                style={styles.lscVideo} 
+                                source={imageSource} 
+                                contentFit="cover"
+                            />
+                            
+                            <TouchableOpacity style={styles.playButton} onPress={loadGif}>
+                            {!isPlaying ? (
+                                <Icon 
+                                    name="controller-play"
+                                    type="entypo" 
+                                    color="#fff" 
+                                    size={30} />
+                            ):(
+                                <Icon 
+                                    name="pause"
+                                    type="fontAwesome6" 
+                                    color="#fff" 
+                                    size={30} />  
+                            )}
+
+                            </TouchableOpacity>
+                        </View>
                     
-                    <TouchableOpacity style={styles.playButton} onPress={loadGif}>
-                    {!isPlaying ? (
-                        <Icon 
-                            name="controller-play"
-                            type="entypo" 
-                            color="#fff" 
-                            size={30} />
-                    ):(
-                        <Icon 
-                            name="pause"
-                            type="fontAwesome6" 
-                            color="#fff" 
-                            size={30} />  
-                    )}
 
-                    </TouchableOpacity>
-                </View>
-            
-
-            <View style = {styles.textContainer}>
-                <Text style={styles.subtitle}>Texto - Audio</Text>
-                <View style={styles.inputWrapper}>
-                <TextInput
-                    style={styles.textarea}
-                    value={text}
-                    onChangeText={setText}
-                    placeholder="Escribe aquí..."
-                    placeholderTextColor="#350066"
-                    multiline={true} // Permite múltiples líneas
-                    numberOfLines={4} // Define una altura inicial (opcional)
-                    textAlignVertical="top" // Alinea el texto en la parte superior
-                />
-                <TouchableOpacity style={styles.micButton} onPress={!recognizing ? handleStart : () => ExpoSpeechRecognitionModule.stop()}>
-                {!recognizing ? (
-                    <Icon 
-                        style={styles.icon}
-                        name= 'microphone'
-                        type='font-awesome'
-                        color="#fff"
-                    />  
-                
-                ) : ( 
-                    <Icon
-                        style={styles.icon}
-                        name= 'microphone-slash'
-                        type='font-awesome'
-                        color="#fff"
-                    />
-                
-                    )}
-                </TouchableOpacity>
-                </View>
-            </View>
-                
-            <View style={styles.buttonsContainer}>
-                <TouchableOpacity
-                    style={styles.sideButtons}
-                    onPress={() => navigation.navigate('Home')}
-                >
-                    <Image source={icons[0].source} style={styles.image}></Image>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    style={styles.centerButton}
-                    onPress={() => navigation.navigate('TranslatorLSCEsp')}
-                >
-                    <Image source={icons[1].source} style={styles.imageCenter}></Image>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.sideButtons}
-                    onPress={() => navigation.navigate('Dictionary')}
-                >
-                    <Image source={icons[2].source} style={styles.image}></Image>
-                </TouchableOpacity>
-            </View>
-            
-        </ScrollView> 
-        </KeyboardAvoidingView>
+                    <View style = {styles.textContainer}>
+                        <Text style={styles.subtitle}>Texto - Audio</Text>
+                        <View style={styles.inputWrapper}>
+                        <TextInput
+                            style={styles.textarea}
+                            value={text}
+                            onChangeText={setText}
+                            placeholder="Escribe aquí..."
+                            placeholderTextColor="#350066"
+                            multiline={true} // Permite múltiples líneas
+                            numberOfLines={4} // Define una altura inicial (opcional)
+                            textAlignVertical="top" // Alinea el texto en la parte superior
+                        />
+                        <TouchableOpacity style={styles.micButton} onPress={!recognizing ? handleStart : () => ExpoSpeechRecognitionModule.stop()}>
+                        {!recognizing ? (
+                            <Icon 
+                                style={styles.icon}
+                                name= 'microphone'
+                                type='font-awesome'
+                                color="#fff"
+                            />  
+                        
+                        ) : ( 
+                            <Icon
+                                style={styles.icon}
+                                name= 'microphone-slash'
+                                type='font-awesome'
+                                color="#fff"
+                            />
+                        
+                            )}
+                        </TouchableOpacity>
+                        </View>
+                    </View>
+                        
+                    <View style={styles.buttonsContainer}>
+                        <TouchableOpacity
+                            style={styles.sideButtons}
+                            onPress={() => navigation.navigate('Home')}
+                        >
+                            <Image source={icons[0].source} style={styles.image}></Image>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={styles.centerButton}
+                            onPress={() => navigation.navigate('TranslatorLSCEsp')}
+                        >
+                            <Image source={icons[1].source} style={styles.imageCenter}></Image>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.sideButtons}
+                            onPress={() => navigation.navigate('Dictionary')}
+                        >
+                            <Image source={icons[2].source} style={styles.image}></Image>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView> 
+            </KeyboardAvoidingView>
+        </>
+        
     );
 };
 
 const styles = StyleSheet.create({
     container: { 
         flex: 1, 
-        paddingVertical: 20, 
         paddingTop: Constants.statusBarHeight,
         backgroundColor: "#d7e6fa" 
     },
     scrollView: { 
         flexGrow: 1, 
         paddingHorizontal: 20 ,
+        paddingTop: Constants.statusBarHeight,
     },
     lscContainer: { 
         width: "100%", 
         height: 400, 
         alignItems: "center", 
-        position: "relative" 
+        position: "relative",
     },
     lscVideo: { 
         width: "100%", 
@@ -264,7 +282,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-evenly', 
-        bottom: 0,
+        bottom: 10,
         marginLeft: 20
     },
     centerButton: { 
@@ -286,7 +304,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 4,
         borderColor: '#350066',
-        backgroundColor: '#d7e6fa',
+        backgroundColor: '#d6cffb',
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -305,7 +323,12 @@ const styles = StyleSheet.create({
         width: 55,
         height: 55,
     },
-    
+    background: {
+        width: '100%',
+        height: 400,
+        position: 'absolute',
+        bottom: 310,
+    }
 });
 
 export default TranslatorEspLSC;
