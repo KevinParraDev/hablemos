@@ -26,7 +26,7 @@ const cardsExample = [
     {
         source: require('../assets/images/ComoEstas.jpg'),
         sourceVideo:  require('../assets/Gif/ComoEstas.gif'),
-        word: '¿ Cómo estás ?'
+        word: '¿Cómo estás?'
     },
     {
         source: require('../assets/images/imageTest.png'),
@@ -151,21 +151,22 @@ const Dictionary = () => {
 
     };
 
-    const handleShare = async (imgPath) => {
+    const handleShare = async (imgPath, word) => {
         try {
             const asset = await Asset.loadAsync(imgPath);
-    
             const fileUri = asset[0].localUri || asset[0].uri;
         
             if (!fileUri.startsWith("file://")) {
                 throw new Error("La imagen no se descargó correctamente.");
             }
+
+            const hablemosMessage = `${word} en Lengua de Señas Colombiana (LSC). Si quieres aprender más, descarga Hablemos 📲🤟🏻`;
         
             // 3️⃣ Compartir la imagen y el texto
             const options = {
                 title: "Compartir imagen y texto",
-                message: "Si quieres aprender más, descarga Hablemos 📲🤟🏻",
-                url: fileUri, // Ahora es una ruta válida
+                message: hablemosMessage,
+                url: fileUri,
                 type: "image/jpeg",
             };
         
@@ -273,7 +274,7 @@ const Dictionary = () => {
                                         />
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity style={styles.modalButton} onPress={() => handleShare(selectedCard.source)}>
+                                    <TouchableOpacity style={styles.modalButton} onPress={() => handleShare(selectedCard.source, selectedCard.word)}>
                                         <Icon 
                                             name= 'share-alt'
                                             type='font-awesome'
