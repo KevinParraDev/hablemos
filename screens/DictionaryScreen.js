@@ -9,7 +9,8 @@ import { FavoritesContext } from "./context/FavoritesContext";
 import Share from 'react-native-share'
 import { StatusBar } from 'expo-status-bar';
 import { Asset } from 'expo-asset';
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native"
+import * as FileSystem from "expo-file-system";
 import * as NavigationBar from 'expo-navigation-bar';
 
 const cardsExample = [
@@ -153,27 +154,32 @@ const Dictionary = () => {
 
     const handleShare = async (imgPath, word) => {
         try {
-            const asset = await Asset.loadAsync(imgPath);
-            const fileUri = asset[0].localUri || asset[0].uri;
-        
-            if (!fileUri.startsWith("file://")) {
-                throw new Error("La imagen no se descargó correctamente.");
-            }
-
-            const hablemosMessage = `${word} en Lengua de Señas Colombiana (LSC). Si quieres aprender más, descarga Hablemos 📲🤟🏻`;
-        
-            // 3️⃣ Compartir la imagen y el texto
-            const options = {
-                title: "Compartir imagen y texto",
-                message: hablemosMessage,
-                url: fileUri,
-                type: "image/jpeg",
-            };
-        
-            await Share.open(options);
-
+          const asset = Asset.fromModule(imgPath);
+          await asset.downloadAsync();
+      
+          const fileUri = `${FileSystem.cacheDirectory}shared-image.jpg`;
+          await FileSystem.copyAsync({
+            from: asset.localUri || asset.uri,
+            to: fileUri,
+          });
+      
+          const fileInfo = await FileSystem.getInfoAsync(fileUri);
+          if (!fileInfo.exists) {
+            throw new Error("No se pudo acceder a la imagen para compartir.");
+          }
+      
+          const hablemosMessage = `${word} en Lengua de Señas Colombiana (LSC). Si quieres aprender más, descarga Hablemos 📲🤟🏻`;
+      
+          const options = {
+            title: "Compartir imagen y texto",
+            message: hablemosMessage,
+            url: fileUri,
+            type: "image/jpeg",
+          };
+      
+          await Share.open(options);
         } catch (error) {
-            console.error("Error al compartir:", error);
+          console.error("Error al compartir:", error);
         }
     };
 
